@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-brand-dark text-slate-100 font-sans antialiased overflow-x-hidden selection:bg-brand-primary selection:text-white;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.05) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.02) 0px, transparent 50%);
+  }
+
+  /* Custom Premium Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #030712;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  @apply bg-slate-900/40 backdrop-blur-md border border-brand-border rounded-2xl;
+}
+
+.glass-card {
+  @apply bg-slate-900/30 border border-white/[0.05] rounded-xl hover:border-white/[0.12] transition-all duration-300 backdrop-blur-sm;
+}
+
+/* Glowing Border Effect */
+.glow-button {
+  @apply relative overflow-hidden transition-all duration-300;
+}
+.glow-button::after {
+  content: '';
+  @apply absolute inset-0 opacity-0 bg-gradient-to-r from-brand-primary to-brand-secondary filter blur-xl transition-all duration-500 -z-10;
+}
+.glow-button:hover::after {
+  @apply opacity-30 scale-125;
+}
+
+/* Lenis smooth scroll configuration styles */
+html.lenis {
+  height: auto;
+}
+
+.lenis-smooth {
+  scroll-behavior: auto;
+}
+
+.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Page Transitions */
+.page-fade-scale-enter-active,
+.page-fade-scale-leave-active {
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.page-fade-scale-enter-from {
+  opacity: 0;
+  transform: scale(0.98) translateY(8px);
+}
+.page-fade-scale-leave-to {
+  opacity: 0;
+  transform: scale(1.01) translateY(-8px);
+}
+
+/* Custom Ripple Effect */
+.btn-ripple {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  animation: ripple-anim 0.6s ease-out;
+  pointer-events: none;
+  width: 100px;
+  height: 100px;
+}
+@keyframes ripple-anim {
+  to {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+/* Skeleton Loading State Shimmer */
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Custom Cursor Styles (Desktop Only) */
+@media (pointer: fine) {
+  .custom-cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    background-color: #6366f1;
+    border-radius: 50%;
+    z-index: 10000;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+  .custom-cursor-follower {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    border: 1.5px solid rgba(99, 102, 241, 0.5);
+    border-radius: 50%;
+    z-index: 9999;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    overflow: hidden;
+  }
+}
+
+/* Typewriter Blink Cursor */
+.typewriter-cursor::after {
+  content: '|';
+  animation: blink 0.8s step-end infinite;
+}
+@keyframes blink {
+  from, to { color: transparent }
+  50% { color: #6366f1 }
+}
+
+/* Theme Switching Animation Switcher class */
+.theme-transitioning * {
+  transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease !important;
+}
+

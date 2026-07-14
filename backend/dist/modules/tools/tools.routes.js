@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const tools_controller_1 = require("./tools.controller");
+const auth_1 = require("../../middlewares/auth");
+const router = (0, express_1.Router)();
+router.post("/log", auth_1.optionalAuthMiddleware, tools_controller_1.logToolUsage);
+router.get("/history", auth_1.optionalAuthMiddleware, tools_controller_1.getToolHistory);
+router.post("/history/clear", auth_1.optionalAuthMiddleware, tools_controller_1.clearToolHistory);
+router.post("/format-sql", tools_controller_1.formatSql);
+router.post("/test-api", tools_controller_1.testApi);
+exports.default = router;

@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const playground_controller_1 = require("./playground.controller");
+const router = (0, express_1.Router)();
+router.post("/sqli", playground_controller_1.simulateSql);
+router.post("/xss", playground_controller_1.simulateXss);
+router.post("/sandbox", playground_controller_1.runLinuxSandbox);
+router.post("/hash-compare", playground_controller_1.hashDemo);
+router.all("/inspect", playground_controller_1.inspectRequest);
+exports.default = router;

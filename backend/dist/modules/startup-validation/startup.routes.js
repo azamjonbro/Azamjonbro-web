@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const startup_controller_1 = require("./startup.controller");
+const auth_1 = require("../../middlewares/auth");
+const router = (0, express_1.Router)();
+router.post("/validate", auth_1.optionalAuthMiddleware, startup_controller_1.validateIdea);
+router.get("/saved", auth_1.authMiddleware, startup_controller_1.getSavedValidations);
+router.get("/:token", startup_controller_1.getValidationByToken);
+exports.default = router;

@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const roadmaps_controller_1 = require("./roadmaps.controller");
+const auth_1 = require("../../middlewares/auth");
+const router = (0, express_1.Router)();
+router.post("/generate", auth_1.optionalAuthMiddleware, roadmaps_controller_1.generateRoadmap);
+router.get("/saved", auth_1.authMiddleware, roadmaps_controller_1.getSavedRoadmaps);
+router.get("/:token", roadmaps_controller_1.getRoadmapByToken);
+router.get("/:token/pdf", roadmaps_controller_1.exportPdf);
+exports.default = router;
