@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { WALL_DISPLAYS } from '@/lib/layout'
@@ -6,6 +6,7 @@ import { createWallDisplayTexture } from '@/lib/textures'
 import { useRoom } from '@/state/RoomContext'
 import type { ObjectId } from '@/data/interactiveObjects'
 import { Hotspot } from './Hotspot'
+import { useProceduralTexture } from '@/hooks/useTexture'
 
 /** Three wall-mounted project panels, plus the shelf and LED beneath them. */
 export function WallDisplays() {
@@ -20,7 +21,7 @@ export function WallDisplays() {
 }
 
 function Panel({ id, y }: { id: ObjectId; y: number }) {
-  const texture = useMemo(() => createWallDisplayTexture(id), [id])
+  const texture = useProceduralTexture(() => createWallDisplayTexture(id), [id])
   const { hovered } = useRoom()
   const isHovered = hovered?.id === id
 

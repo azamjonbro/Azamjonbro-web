@@ -9,11 +9,12 @@ import {
   createRugTexture,
 } from '@/lib/textures'
 import { Hotspot } from './Hotspot'
+import { useProceduralTexture } from '@/hooks/useTexture'
 
 /* ─── FLOOR, WALLS, CEILING ───────────────────────────────────── */
 export function Shell() {
-  const rug = useMemo(() => createRugTexture(), [])
-  const floorRough = useMemo(() => createNoiseRoughness(190, 70), [])
+  const rug = useProceduralTexture(() => createRugTexture())
+  const floorRough = useProceduralTexture(() => createNoiseRoughness(190, 70))
 
   return (
     <group>
@@ -124,7 +125,7 @@ function BackWall() {
 
 /* ─── WINDOW, BLINDS AND THE CITY BEYOND ──────────────────────── */
 function Window() {
-  const city = useMemo(() => createCityTexture(), [])
+  const city = useProceduralTexture(() => createCityTexture())
   const cx = (WINDOW.x0 + WINDOW.x1) / 2
   const cy = (WINDOW.y0 + WINDOW.y1) / 2
   const w = WINDOW.x1 - WINDOW.x0
@@ -181,7 +182,7 @@ function Window() {
 
 /* ─── HEAVY BLUE VELVET CURTAINS ──────────────────────────────── */
 function Curtains() {
-  const fabric = useMemo(() => createFabricTexture('#152648'), [])
+  const fabric = useProceduralTexture(() => createFabricTexture('#152648'))
   const left = useRef<THREE.Group>(null)
   const right = useRef<THREE.Group>(null)
 

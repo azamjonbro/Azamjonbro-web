@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { MONITOR } from '@/lib/layout'
@@ -6,6 +6,7 @@ import { createClockTexture, createKeycapTexture, createMacBookTexture } from '@
 import { useRoom } from '@/state/RoomContext'
 import { HitBox, Hotspot } from './Hotspot'
 import { Movable } from './Movable'
+import { useProceduralTexture } from '@/hooks/useTexture'
 
 /* ─── MONITOR ARM ─────────────────────────────────────────────── */
 export function MonitorArm() {
@@ -88,7 +89,7 @@ export function MonitorBody({ children }: { children?: React.ReactNode }) {
 
 /* ─── MACBOOK AIR M1 ON A LAPTOP ARM ──────────────────────────── */
 export function MacBook() {
-  const screen = useMemo(() => createMacBookTexture(), [])
+  const screen = useProceduralTexture(() => createMacBookTexture())
   const { openResume } = useRoom()
 
   return (
@@ -162,7 +163,7 @@ export function MacBook() {
 
 /* ─── RGB MECHANICAL KEYBOARD ─────────────────────────────────── */
 export function Keyboard() {
-  const caps = useMemo(() => createKeycapTexture(), [])
+  const caps = useProceduralTexture(() => createKeycapTexture())
 
   return (
     <Movable id="keyboard">
@@ -446,7 +447,7 @@ export function RingLight() {
 
 /* ─── DIGITAL CLOCK ───────────────────────────────────────────── */
 export function DigitalClock() {
-  const face = useMemo(() => createClockTexture('22:18'), [])
+  const face = useProceduralTexture(() => createClockTexture('22:18'))
 
   return (
     <Movable id="clock">
