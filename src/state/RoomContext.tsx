@@ -220,6 +220,17 @@ export function RoomProvider({ children }: { children: ReactNode }) {
     setLoading(false)
   }, [])
 
+  /* The curtain has to lift even when the room never arrives: a device that
+     cannot get a WebGL context never mounts the canvas, and a timer living
+     inside it would never run. This one is owned by the page. */
+  useEffect(() => {
+    const bail = setTimeout(() => {
+      setProgress(100)
+      setLoading(false)
+    }, 2600)
+    return () => clearTimeout(bail)
+  }, [])
+
   const toggleAudio = useCallback(() => {
     setAudioOn(ambientAudio.toggle())
   }, [])

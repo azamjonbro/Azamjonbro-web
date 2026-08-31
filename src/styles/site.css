@@ -99,7 +99,10 @@
 /* ─── TYPE ────────────────────────────────────────────────────── */
 
 .sec-head {
-  max-width: 24ch;
+  /* Explicit, not `ch`: this wrapper runs at body size, so a `ch` measure
+     here would size the column to the body font and not to the display
+     type it actually contains. */
+  max-width: min(100%, 46rem);
   margin-bottom: clamp(3rem, 7vw, 5.5rem);
 }
 
@@ -130,7 +133,7 @@
   margin: 0;
   font-family: var(--font-display), sans-serif;
   font-weight: 500;
-  font-size: clamp(2.35rem, 5.6vw, 5.25rem);
+  font-size: clamp(2.2rem, 5vw, 4.75rem);
   line-height: 0.98;
   letter-spacing: -0.035em;
   color: var(--text);
@@ -492,7 +495,7 @@
 }
 
 .hero-type {
-  max-width: 20ch;
+  max-width: min(100%, 62rem);
   will-change: transform, opacity;
 }
 
@@ -528,8 +531,8 @@
   margin: 0;
   font-family: var(--font-display), sans-serif;
   font-weight: 500;
-  font-size: clamp(2.9rem, 8.4vw, 8.4rem);
-  line-height: 0.93;
+  font-size: clamp(2.6rem, 6.6vw, 6.75rem);
+  line-height: 0.95;
   letter-spacing: -0.045em;
   color: var(--text);
 }
@@ -972,7 +975,7 @@
 }
 
 .cs-head {
-  max-width: 30ch;
+  max-width: min(100%, 34rem);
 }
 
 .cs-eyebrow {
@@ -1674,7 +1677,7 @@
 }
 
 .contact-heading {
-  max-width: 16ch;
+  max-width: min(100%, 42rem);
 }
 
 .contact-body {

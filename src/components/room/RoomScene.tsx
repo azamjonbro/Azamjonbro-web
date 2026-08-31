@@ -35,17 +35,9 @@ function LoadProgress() {
 
   useEffect(() => {
     if (!loading || active) return
-    const timer = setTimeout(finishLoading, 500)
+    const timer = setTimeout(finishLoading, 350)
     return () => clearTimeout(timer)
   }, [active, loading, finishLoading])
-
-  /* Every texture in the room is drawn at runtime, so there is nothing to
-     wait on but the first frame. The bail is a guard, not a schedule. */
-  useEffect(() => {
-    if (!loading) return
-    const bail = setTimeout(finishLoading, 3000)
-    return () => clearTimeout(bail)
-  }, [loading, finishLoading])
 
   return null
 }
