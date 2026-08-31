@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Azamjonbro — Full-Stack Developer &amp; AI Automation</title>
+    <meta
+      name="description"
+      content="Azamjonbro is a full-stack developer building digital products, AI automations, and scalable web systems."
+    />
+    <link rel="canonical" href="https://azamjonbro.uz" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://azamjonbro.uz" />
+    <meta property="og:title" content="Azamjonbro — Full-Stack Developer & AI Automation" />
+    <meta
+      property="og:description"
+      content="Azamjonbro is a full-stack developer building digital products, AI automations, and scalable web systems."
+    />
+    <meta property="og:site_name" content="Azamjonbro" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Azamjonbro — Full-Stack Developer & AI Automation" />
+    <meta
+      name="twitter:description"
+      content="Azamjonbro is a full-stack developer building digital products, AI automations, and scalable web systems."
+    />
+
+    <link
+      rel="preload"
+      href="/fonts/space-grotesk-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister()
+          }
+        })
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
