@@ -45,19 +45,27 @@
   box-sizing: border-box;
 }
 
-html,
+html {
+  /* Lenis owns the scroll animation; the native one would fight it. */
+  scroll-behavior: auto;
+  overscroll-behavior-y: none;
+}
+
 body {
   margin: 0;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans), system-ui, sans-serif;
+  font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-#root {
-  height: 100%;
+/* Set while a sheet is open, so the page behind it cannot scroll away. */
+html.is-locked,
+html.is-locked body {
+  overflow: hidden;
 }
 
 button {
@@ -69,108 +77,27 @@ button {
 }
 
 /* ─── CANVAS ──────────────────────────────────────────────────── */
-.room-canvas {
+
+/**
+ * The room sits behind the entire document, not just the hero, so the
+ * camera can keep moving while the visitor reads. It only accepts the
+ * pointer while the hero owns the viewport — below that every click, and
+ * every raycast the pointer would have triggered, belongs to the page.
+ */
+.room-layer {
   position: fixed;
   inset: 0;
   z-index: 0;
-}
-
-/* ─── TOP CHROME ──────────────────────────────────────────────── */
-.hud {
-  position: fixed;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   pointer-events: none;
 }
 
-.hud-top {
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 22px 30px;
+.room-layer.is-live {
+  pointer-events: auto;
 }
 
-.hud-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.hud-brand-mark {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: var(--accent);
-  box-shadow: 0 0 14px var(--accent);
-}
-
-.hud-brand-name {
-  font-family: var(--font-display), sans-serif;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.hud-brand-role {
-  color: var(--dim);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  padding-left: 10px;
-  border-left: 1px solid var(--hair);
-}
-
-.hud-counter {
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 7px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  color: var(--dim);
-}
-
-.hud-counter-value {
-  color: var(--accent-soft);
-  font-size: 13px;
-}
-
-.hud-exit {
-  position: fixed;
-  z-index: 45;
-  left: 30px;
-  bottom: 28px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 11px 16px;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  color: var(--ink);
-  background: var(--glass);
-  border: 1px solid var(--hair);
-  border-radius: 12px;
-  backdrop-filter: blur(20px) saturate(150%);
-  transition: border-color 0.25s ease, transform 0.25s ease;
-}
-
-.hud-exit:hover {
-  border-color: var(--hair-strong);
-  transform: translateY(-1px);
-}
-
-.hud-exit kbd {
-  font-family: var(--mono);
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 5px;
-  color: var(--muted);
-  border: 1px solid var(--hair);
-  background: rgba(255, 255, 255, 0.03);
+.room-canvas {
+  position: absolute;
+  inset: 0;
 }
 
 /* ─── TOOLTIP ─────────────────────────────────────────────────── */
