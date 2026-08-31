@@ -193,7 +193,9 @@ function Effects() {
 }
 
 export function RoomScene() {
-  const { isMobile, isTouch, roomLive, select } = useRoom()
+  /* Pointer events are switched off in CSS on `.room-layer` once the hero is
+     behind us, which is also what stops R3F raycasting the scene per move. */
+  const { isMobile, isTouch, select } = useRoom()
   const lightweight = isMobile || isTouch
 
   return (
@@ -201,9 +203,6 @@ export function RoomScene() {
       <Canvas
         shadows={lightweight ? false : 'soft'}
         dpr={lightweight ? [1, 1.5] : [1, 2]}
-        /* Raycasting a scene this dense on every pointer move is wasted work
-           once the page has scrolled past the hero and the room is a backdrop. */
-        raycaster={{ enabled: roomLive } as never}
         camera={{
           position: CAMERA.room.position.toArray(),
           fov: CAMERA.room.fov,
