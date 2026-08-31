@@ -39,10 +39,11 @@ function LoadProgress() {
     return () => clearTimeout(timer)
   }, [active, loading, finishLoading])
 
-  /* Nothing in the room is worth a permanent loading screen. */
+  /* Every texture in the room is drawn at runtime, so there is nothing to
+     wait on but the first frame. The bail is a guard, not a schedule. */
   useEffect(() => {
     if (!loading) return
-    const bail = setTimeout(finishLoading, 8000)
+    const bail = setTimeout(finishLoading, 3000)
     return () => clearTimeout(bail)
   }, [loading, finishLoading])
 
@@ -100,6 +101,8 @@ function RoomEnvironment() {
 }
 
 function RoomContents() {
+  const { isTouch } = useRoom()
+
   return (
     <>
       <Lighting />
@@ -109,7 +112,10 @@ function RoomContents() {
       <Movable id="monitor">
         <MonitorArm />
         <MonitorBody />
-        <MonitorScreen />
+        {/* A real DOM tree rendered in 3D is the most expensive thing in the
+            room and needs a cursor to be worth anything. Touch gets the panel
+            without the machine behind it. */}
+        {!isTouch && <MonitorScreen />}
       </Movable>
 
       <MacBook />
@@ -147,13 +153,17 @@ function RoomContents() {
 const DOF_TARGET: [number, number, number] = [0.2, 1.0, -1.2]
 
 function Effects() {
-  const { isMobile, view, layout } = useRoom()
+  const { isMobile, isTouch, view, layout } = useRoom()
   const focus = monitorPanelWorld(layout.monitor).position
 
-  if (isMobile) {
+  /* Phones pay for the room's identity, not for its polish: a vignette and
+     a whisper of bloom keep the palette, and the passes that cost a full
+     depth prepass — ambient occlusion, depth of field, the outline — are
+     the ones a mobile GPU cannot afford at 60fps. */
+  if (isMobile || isTouch) {
     return (
-      <EffectComposer>
-        <Bloom luminanceThreshold={1.1} luminanceSmoothing={0.25} intensity={0.3} mipmapBlur />
+      <EffectComposer multisampling={0}>
+        <Bloom luminanceThreshold={1.15} luminanceSmoothing={0.25} intensity={0.26} mipmapBlur />
         <Vignette offset={0.32} darkness={0.5} blendFunction={BlendFunction.NORMAL} />
       </EffectComposer>
     )
@@ -183,13 +193,17 @@ function Effects() {
 }
 
 export function RoomScene() {
-  const { isMobile, select } = useRoom()
+  const { isMobile, isTouch, roomLive, select } = useRoom()
+  const lightweight = isMobile || isTouch
 
   return (
     <div className="room-canvas">
       <Canvas
-        shadows={isMobile ? false : 'soft'}
-        dpr={isMobile ? [1, 1.5] : [1, 2]}
+        shadows={lightweight ? false : 'soft'}
+        dpr={lightweight ? [1, 1.5] : [1, 2]}
+        /* Raycasting a scene this dense on every pointer move is wasted work
+           once the page has scrolled past the hero and the room is a backdrop. */
+        raycaster={{ enabled: roomLive } as never}
         camera={{
           position: CAMERA.room.position.toArray(),
           fov: CAMERA.room.fov,
