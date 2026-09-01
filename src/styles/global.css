@@ -54,34 +54,24 @@
 html,
 body {
   margin: 0;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
   background: var(--void);
   color: var(--text);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Pages scroll — they are the default now. Only the world locks the document,
+   because there the wheel and the arrow keys belong to the camera. */
+html:has(.world-canvas),
+html:has(.world-canvas) body {
+  height: 100%;
+  overflow: hidden;
   overscroll-behavior: none;
 }
 
-/* The written portfolio scrolls; the world does not.
-   `overflow` alone is not enough — the `height: 100%` above pins the document
-   to the viewport, so the height has to be released as well or the page ends
-   at the fold with the rest of the article underneath it. */
-html:has(.doc:not(.is-offscreen)),
-html:has(.doc:not(.is-offscreen)) body {
-  height: auto;
-  min-height: 100%;
-  overflow: auto;
-}
-
-html:has(.doc:not(.is-offscreen)) #root {
-  height: auto;
-}
-
-#root {
-  height: 100%;
-}
+html:has(.world-canvas) #root { height: 100%; }
 
 button {
   font: inherit;

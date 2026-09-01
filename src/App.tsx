@@ -1,51 +1,72 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { WorldProvider, useWorld } from '@/state/WorldContext'
 import { useControls } from '@/hooks/useControls'
+import { articleSlug, navigate, routes, usePathname } from '@/lib/router'
+import { Landing } from '@/components/site/Landing'
+import { BlogArticle, BlogIndex } from '@/components/site/Blog'
 import { Boot } from '@/components/ui/Boot'
 import { Hud } from '@/components/ui/Hud'
 import { Joystick } from '@/components/ui/Joystick'
 import { Cursor } from '@/components/ui/Cursor'
 import { ZonePanel } from '@/components/ui/Panels'
 import { ProjectPanel } from '@/components/ui/ProjectPanel'
-import { Fallback } from '@/components/ui/Fallback'
+import { getArticle } from '@/data/lab'
+import { site } from '@/data/site'
 import '@/styles/ui.css'
 
 /**
  * The station is the only thing that pulls three.js, so it stays behind a
- * dynamic import: the boot screen, the copy and the accessible document are
- * all interactive before the renderer has been fetched, and a device that
- * cannot get a context never downloads it at all.
+ * dynamic import. On a phone — where the landing page is the default — the
+ * renderer is never fetched at all unless somebody asks for the demo.
  */
-const SpaceScene = lazy(() =>
-  import('@/components/world/SpaceScene').then((m) => ({ default: m.SpaceScene })),
-)
+const World = lazy(() => import('@/components/world/World'))
 
-function Experience() {
-  const { hasWebGL, stage, readMode, closeReadMode, enter } = useWorld()
-  useControls()
+/**
+ * Four routes.
+ *
+ *   /            the portfolio — 3D on desktop, the page on touch
+ *   /world       the 3D demo, explicitly, on any device
+ *   /blog        the write-ups
+ *   /blog/:slug  one write-up
+ *
+ * The split at `/` is not a fallback. A phone reaches this content faster by
+ * reading it than by walking a station on a five-inch screen, so on touch the
+ * page is the site and the world is an optional demo behind its own URL.
+ */
+function Routes() {
+  const pathname = usePathname()
+  const { hasWebGL, isTouch } = useWorld()
 
-  /* No context, no world — but never a blank page. */
-  if (!hasWebGL) return <Fallback visible />
+  const slug = articleSlug(pathname)
+  const worldAvailable = hasWebGL
 
-  /* Chosen, rather than fallen back to: the same document, with a way out.
-     Leaving it goes into the world, not back to the boot screen the visitor
-     has already dismissed. */
-  if (readMode) {
-    return (
-      <Fallback
-        visible
-        onEnterWorld={() => {
-          closeReadMode()
-          if (stage !== 'entered') enter()
-        }}
-      />
-    )
+  useDocumentTitle(pathname, slug)
+
+  if (slug) return <BlogArticle slug={slug} />
+  if (pathname === routes.blog) return <BlogIndex />
+
+  const wantsWorld = pathname === routes.world
+  /* Desktop keeps the world as the front door; touch has to ask for it. */
+  const showWorld = worldAvailable && (wantsWorld || !isTouch)
+
+  if (!showWorld) {
+    /* Someone who asked for /world without a context should not get a blank
+       page — send them to the one that works and leave no dead entry in the
+       history for Back to land on. */
+    if (wantsWorld && !worldAvailable) navigate(routes.home, { replace: true })
+    return <Landing canEnterWorld={worldAvailable} />
   }
+
+  return <WorldExperience />
+}
+
+function WorldExperience() {
+  useControls()
 
   return (
     <>
       <Suspense fallback={null}>
-        <SpaceScene />
+        <World />
       </Suspense>
 
       <Boot />
@@ -54,24 +75,32 @@ function Experience() {
       <ZonePanel />
       <ProjectPanel />
       <Cursor />
-
-      {/* Present for crawlers and assistive technology even while the world
-          is running, so the content is never locked inside the canvas. */}
-      <Fallback visible={false} />
-
-      {stage === 'entered' && (
-        <a className="skip-link" href="#doc-projects">
-          Skip to the written portfolio
-        </a>
-      )}
     </>
   )
+}
+
+/**
+ * The title is the only per-route metadata that can be set client-side and
+ * still matter — it is what a tab, a bookmark and a shared link show.
+ */
+function useDocumentTitle(pathname: string, slug: string | null) {
+  useEffect(() => {
+    const article = slug ? getArticle(slug) : undefined
+
+    document.title = article
+      ? `${article.meta.title} — ${site.person}`
+      : pathname === routes.blog
+        ? `Lab — ${site.title}`
+        : pathname === routes.world
+          ? `Azamjon Space — ${site.person}`
+          : site.title
+  }, [pathname, slug])
 }
 
 export default function App() {
   return (
     <WorldProvider>
-      <Experience />
+      <Routes />
     </WorldProvider>
   )
 }

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { getZone, zones } from '@/data/zones'
 import { getProject } from '@/data/projects'
 import { site } from '@/data/site'
+import { routes } from '@/lib/router'
+import { Link } from '@/components/site/Link'
 import { useWorld } from '@/state/WorldContext'
 
 /**
@@ -41,6 +43,11 @@ export function Hud() {
       </header>
 
       <div className={`hud-tools${overlayOpen ? ' is-hidden' : ''}`}>
+        <Link className="hud-btn" to={routes.home}>
+          <span aria-hidden>←</span>
+          <span className="hud-btn__label">PORTFOLIO</span>
+        </Link>
+
         <button
           type="button"
           className={`hud-btn${audioOn ? ' is-on' : ''}`}

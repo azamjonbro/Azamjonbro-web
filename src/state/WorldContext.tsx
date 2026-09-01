@@ -49,11 +49,6 @@ interface WorldValue {
   audioOn: boolean
   toggleAudio: () => void
 
-  /** Reading the portfolio as a document instead of walking the station. */
-  readMode: boolean
-  openReadMode: () => void
-  closeReadMode: () => void
-
   quality: Quality
   hasWebGL: boolean
   isTouch: boolean
@@ -71,7 +66,6 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   const [openProject, setOpenProject] = useState<string | null>(null)
   const [hintSeen, setHintSeen] = useState(false)
   const [audioOn, setAudioOn] = useState(false)
-  const [readMode, setReadMode] = useState(false)
 
   const [quality] = useState<Quality>(detectQuality)
   const [hasWebGL] = useState(webglAvailable)
@@ -138,19 +132,8 @@ export function WorldProvider({ children }: { children: ReactNode }) {
 
   const toggleAudio = useCallback(() => setAudioOn(ambientAudio.toggle()), [])
 
-  const openReadMode = useCallback(() => {
-    uiSounds.click()
-    releaseControls()
-    setReadMode(true)
-  }, [])
 
-  const closeReadMode = useCallback(() => {
-    setReadMode(false)
-    window.scrollTo(0, 0)
-  }, [])
-
-  const blocked =
-    stage !== 'entered' || readMode || openZone !== null || openProject !== null
+  const blocked = stage !== 'entered' || openZone !== null || openProject !== null
 
   /* Escape unwinds one layer at a time, innermost first. */
   useEffect(() => {
@@ -190,9 +173,6 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       retireHint,
       audioOn,
       toggleAudio,
-      readMode,
-      openReadMode,
-      closeReadMode,
       quality,
       hasWebGL,
       isTouch,
@@ -204,7 +184,6 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       nearProject, openProject, showProject, closeProject,
       blocked, hintSeen, retireHint,
       audioOn, toggleAudio,
-      readMode, openReadMode, closeReadMode,
       quality, hasWebGL, isTouch, reducedMotion,
     ],
   )
