@@ -109,27 +109,6 @@ button {
   user-select: none;
 }
 
-.skip-link {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  z-index: 300;
-  transform: translate(-50%, -140%);
-  padding: 12px 20px;
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  color: #04070c;
-  background: var(--cyan);
-  border-radius: 0 0 10px 10px;
-  text-decoration: none;
-  transition: transform 0.2s var(--snap);
-}
-
-.skip-link:focus-visible {
-  transform: translate(-50%, 0);
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

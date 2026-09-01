@@ -1778,13 +1778,6 @@
 
 .note:hover .note-go { opacity: 1; color: var(--accent); }
 
-.lab-loading {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.22em;
-  color: var(--text-3);
-}
-
 /* ─── LAB: THE READER ─────────────────────────────────────────── */
 
 .reader-back {
@@ -1931,69 +1924,6 @@
    boot screen says who this is before asking anyone to explore, and
    offers reading as a first-class alternative rather than a fallback. */
 
-.boot-info {
-  margin: 0 0 1.9rem;
-  padding: 1.15rem 1.25rem;
-  border: 1px solid var(--line-soft);
-  border-left: 2px solid var(--cyan);
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.022);
-}
-
-.boot-info__name {
-  margin: 0;
-  font-family: var(--font-display), sans-serif;
-  font-size: 1.32rem;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  color: var(--text);
-}
-
-.boot-info__role {
-  margin: 4px 0 0.9rem;
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--cyan);
-}
-
-.boot-info__statement {
-  margin: 0 0 0.75rem;
-  font-size: 0.94rem;
-  line-height: 1.6;
-  color: var(--text);
-  text-wrap: pretty;
-}
-
-.boot-info__body {
-  margin: 0 0 1rem;
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: var(--text-2);
-  text-wrap: pretty;
-}
-
-.boot-info__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.boot-info__tags li {
-  padding: 4px 9px;
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-3);
-  border: 1px solid var(--line-soft);
-  border-radius: 999px;
-}
-
 .boot-actions {
   display: flex;
   flex-wrap: wrap;
@@ -2016,50 +1946,9 @@
 
 /* ─── READ MODE ───────────────────────────────────────────────── */
 
-.doc-bar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin: 0 0 2rem;
-  padding: 14px 0;
-  background: linear-gradient(180deg, var(--void) 72%, transparent);
-}
-
-.doc-bar__mark {
-  margin: 0;
-  font-family: var(--font-display), sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  color: var(--cyan);
-}
-
-.doc-bar__enter {
-  padding: 10px 17px;
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.16em;
-  color: var(--text-2);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-}
-
-.doc-bar__enter:hover { color: var(--text); border-color: var(--line-strong); }
-
-.doc-note {
-  margin-top: 2.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--line-soft);
-}
-
 @media (max-width: 860px) {
   .note { gap: 0.9rem; }
   .note-go { display: none; }
   .prose { font-size: 0.96rem; }
   .prose pre { font-size: 0.76rem; padding: 0.9rem 1rem; }
-  .boot-info { padding: 1rem; }
-}
+  }
