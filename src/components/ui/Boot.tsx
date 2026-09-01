@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { site } from '@/data/site'
+import { about, site } from '@/data/site'
 import { useWorld } from '@/state/WorldContext'
 
 const SEQUENCE = [
@@ -17,7 +17,7 @@ const SEQUENCE = [
  * it, and the same click is the only honest moment to start ambience.
  */
 export function Boot() {
-  const { stage, progress, enter } = useWorld()
+  const { stage, progress, enter, isTouch, openReadMode } = useWorld()
   const [gone, setGone] = useState(false)
 
   useEffect(() => {
@@ -68,17 +68,40 @@ export function Boot() {
           })}
         </ul>
 
-        <button
-          type="button"
-          className={`boot-enter${ready ? ' is-ready' : ''}`}
-          onClick={enter}
-          disabled={!ready}
-        >
-          <span>ENTER THE WORLD</span>
-          <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden>
-            <path d="M1 6h13M9 1l5 5-5 5" stroke="currentColor" strokeWidth="1.5" fill="none" />
-          </svg>
-        </button>
+        {/* A phone reaches the content faster by reading than by walking a
+            station on a five-inch screen, so on touch the landing states who
+            this is up front and offers both routes as equals. */}
+        {isTouch && (
+          <div className="boot-info">
+            <p className="boot-info__name">{about.heading}</p>
+            <p className="boot-info__role">{about.role}</p>
+            <p className="boot-info__statement">{about.statement}</p>
+            <p className="boot-info__body">{about.body}</p>
+            <ul className="boot-info__tags">
+              {about.disciplines.map((d) => (
+                <li key={d}>{d}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="boot-actions">
+          <button
+            type="button"
+            className={`boot-enter${ready ? ' is-ready' : ''}`}
+            onClick={enter}
+            disabled={!ready}
+          >
+            <span>{isTouch ? 'EXPLORE IN 3D' : 'ENTER THE WORLD'}</span>
+            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden>
+              <path d="M1 6h13M9 1l5 5-5 5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+            </svg>
+          </button>
+
+          <button type="button" className="boot-read" onClick={openReadMode}>
+            READ INSTEAD
+          </button>
+        </div>
 
         <p className="boot-foot">
           {site.role} · {site.domain}

@@ -92,8 +92,64 @@ destinations themselves.
 `public/projects/*.webp` are generated placeholder plates. Overwrite a file to
 replace it; no code change. See `public/projects/README.md`.
 
+## Writing in the lab
+
+Articles are plain markdown files in `src/content/lab`. Adding one is creating
+a file — no component to touch, no index to update.
+
+```
+src/content/lab/
+  01-availability.md
+  02-notifications.md
+  03-perceived-speed.md
+  04-vps.md
+```
+
+The numeric prefix sets the order, because the order of a set of write-ups is
+an editorial decision and belongs somewhere you can see it — not in a date
+field somebody has to maintain.
+
+Each file opens with frontmatter:
+
+```markdown
+---
+slug: availability-is-concurrency
+title: Availability is a concurrency problem
+project: Dacha
+summary: One sentence that has to work on its own in the index.
+status: draft
+tags: [Node.js, MongoDB, Booking]
+---
+
+The body is ordinary markdown from here.
+```
+
+| Field     | Notes                                                            |
+| --------- | ---------------------------------------------------------------- |
+| `slug`    | Optional. Defaults to the filename without its number prefix.     |
+| `title`   | Shown in the index and as the article heading.                    |
+| `project` | Optional. Free text — which project the piece came out of.        |
+| `summary` | Shown in the index. Write it to stand alone.                      |
+| `status`  | `draft` renders a visible DRAFT badge. `published` does not.      |
+| `tags`    | Optional list.                                                    |
+
+Reading time is computed from the body at build time, so it can never be
+wrong. There is no date field on purpose: a portfolio with four posts and
+visible dates ages badly the moment you stop writing.
+
+`plugins/markdown.ts` compiles the files during the build, so **no markdown
+parser ships to the browser** — an article costs exactly the bytes of its own
+prose. The compiled articles appear in three places from that one source: the
+LAB panel in the world, the reader inside it, and the written portfolio, which
+is what a crawler and a visitor without WebGL get.
+
 ## Things worth knowing before editing
 
+- **There are two ways through the site, not one.** The station is the
+  experience; the written portfolio is the same content as a document, reached
+  by READ INSTEAD or automatically when WebGL is unavailable. On touch the
+  landing states who this is up front, because a phone reaches the content
+  faster by reading than by walking a station on a five-inch screen.
 - **`data/zones.ts` deliberately does not import three.js.** It is read by the
   HUD and the panels, which are in the eagerly loaded bundle. Importing a
   vector class there pulls the entire renderer in with it — it did, once, and

@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
-import { markdown } from './plugins/markdown'
+import { markdown } from './plugins/markdown.ts'
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), markdown()],

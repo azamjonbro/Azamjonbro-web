@@ -21,11 +21,26 @@ const SpaceScene = lazy(() =>
 )
 
 function Experience() {
-  const { hasWebGL, stage } = useWorld()
+  const { hasWebGL, stage, readMode, closeReadMode, enter } = useWorld()
   useControls()
 
   /* No context, no world — but never a blank page. */
   if (!hasWebGL) return <Fallback visible />
+
+  /* Chosen, rather than fallen back to: the same document, with a way out.
+     Leaving it goes into the world, not back to the boot screen the visitor
+     has already dismissed. */
+  if (readMode) {
+    return (
+      <Fallback
+        visible
+        onEnterWorld={() => {
+          closeReadMode()
+          if (stage !== 'entered') enter()
+        }}
+      />
+    )
+  }
 
   return (
     <>

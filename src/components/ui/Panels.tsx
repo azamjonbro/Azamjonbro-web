@@ -32,7 +32,7 @@ export function ZonePanel() {
       title={zone.label}
       accent={zone.accent}
       onClose={closePanel}
-      wide={openZone === 'projects' || openZone === 'skills'}
+      wide={openZone === 'projects' || openZone === 'skills' || openZone === 'lab'}
     >
       <Body />
     </Panel>

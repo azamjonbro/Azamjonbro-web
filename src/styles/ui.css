@@ -1166,6 +1166,10 @@
 
 /* ─── CURSOR ──────────────────────────────────────────────────── */
 
+/* The custom cursor replaces the system one rather than decorating it.
+   Scoped to the world: read mode is a document and wants a real caret. */
+:root:has(.world-canvas) body { cursor: none; }
+
 .cursor-dot,
 .cursor-ring {
   position: fixed;
@@ -1202,6 +1206,7 @@
 }
 
 @media (hover: none) {
+  :root:has(.world-canvas) body { cursor: auto; }
   .cursor-dot,
   .cursor-ring { display: none; }
 }
@@ -1349,4 +1354,378 @@
   .panel { padding: 1.5rem 1.15rem; }
   .panel-head { padding-right: 4.5rem; }
   .exhibit-meta { gap: 1.5rem; }
+}
+
+/* ─── LAB: THE INDEX ──────────────────────────────────────────── */
+
+.notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.notes li { border-bottom: 1px solid var(--line-soft); }
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  width: 100%;
+  padding: 1.2rem 0.35rem;
+  text-align: left;
+  transition: padding 0.4s var(--snap), background 0.35s var(--snap);
+}
+
+.note:hover {
+  padding-left: 1rem;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent);
+}
+
+.note-index {
+  flex: none;
+  padding-top: 3px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.note-main { flex: 1; display: grid; gap: 7px; min-width: 0; }
+
+.note-title {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.note-summary {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text-3);
+  text-wrap: pretty;
+}
+
+.note-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.note-project { color: var(--accent); }
+
+.note-draft,
+.reader-draft {
+  padding: 2px 7px;
+  color: #ffd36e;
+  border: 1px solid rgba(255, 211, 110, 0.35);
+  border-radius: 3px;
+}
+
+.note-go {
+  flex: none;
+  padding-top: 5px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  color: var(--text-3);
+  opacity: 0;
+  transition: opacity 0.3s var(--snap);
+}
+
+.note:hover .note-go { opacity: 1; color: var(--accent); }
+
+.lab-loading {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  color: var(--text-3);
+}
+
+/* ─── LAB: THE READER ─────────────────────────────────────────── */
+
+.reader-back {
+  display: inline-flex;
+  margin-bottom: 1.75rem;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  color: var(--text-3);
+  transition: color 0.3s var(--snap);
+}
+
+.reader-back:hover { color: var(--accent); }
+
+.reader-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 1rem;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.reader-meta > span:first-child { color: var(--accent); }
+
+.reader-title {
+  margin: 0 0 2.25rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.5rem, 3.6vw, 2.15rem);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.reader-foot {
+  margin-top: 2.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--line-soft);
+}
+
+/* ─── PROSE ───────────────────────────────────────────────────── *
+   Long-form reading, set for the eye rather than for the layout:
+   one column, a measure that does not run past ~70 characters, and
+   vertical rhythm that survives being scrolled inside a panel.       */
+
+.prose {
+  max-width: 68ch;
+  font-size: 1rem;
+  line-height: 1.78;
+  color: var(--text-2);
+}
+
+/* Reset first, then space between siblings. `.prose p { margin: 0 }` used to
+   sit after this rule and, being one specificity point heavier, silently won
+   — every paragraph rendered flush against the last. */
+.prose > * { margin: 0; }
+.prose > * + * { margin-top: 1.15rem; }
+
+.prose p { text-wrap: pretty; }
+
+.prose h2 {
+  margin-top: 2.6rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.22rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.prose h3 {
+  margin-top: 2rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.prose strong { color: var(--text); font-weight: 600; }
+
+.prose a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+.prose ul,
+.prose ol { margin: 1.15rem 0 0; padding-left: 1.35rem; }
+.prose li { margin-top: 0.5rem; }
+.prose li::marker { color: var(--accent); }
+
+.prose blockquote {
+  padding-left: 1.15rem;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--text-3);
+  font-style: normal;
+}
+
+.prose hr {
+  margin: 2.25rem 0;
+  border: 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.prose code {
+  padding: 2px 6px;
+  font-family: var(--mono);
+  font-size: 0.87em;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border-radius: 3px;
+}
+
+.prose pre {
+  margin-top: 1.35rem;
+  padding: 1.1rem 1.25rem;
+  overflow-x: auto;
+  font-size: 0.82rem;
+  line-height: 1.62;
+  background: rgba(4, 6, 11, 0.85);
+  border: 1px solid var(--line-soft);
+  border-left: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 3px;
+}
+
+/* Inline code carries the accent; a whole block would be unreadable in it. */
+.prose pre code {
+  padding: 0;
+  color: #c9d6e8;
+  background: none;
+  font-size: inherit;
+}
+
+.prose pre::-webkit-scrollbar { height: 5px; }
+.prose pre::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; }
+
+/* ─── LANDING INFO (TOUCH) ────────────────────────────────────── *
+   On a phone the station is a slower way to reach the content, so the
+   boot screen says who this is before asking anyone to explore, and
+   offers reading as a first-class alternative rather than a fallback. */
+
+.boot-info {
+  margin: 0 0 1.9rem;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--line-soft);
+  border-left: 2px solid var(--cyan);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.022);
+}
+
+.boot-info__name {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.32rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.boot-info__role {
+  margin: 4px 0 0.9rem;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.boot-info__statement {
+  margin: 0 0 0.75rem;
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: var(--text);
+  text-wrap: pretty;
+}
+
+.boot-info__body {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+
+.boot-info__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.boot-info__tags li {
+  padding: 4px 9px;
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+}
+
+.boot-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+}
+
+.boot-read {
+  padding: 15px 22px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--text-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition: all 0.35s var(--snap);
+}
+
+.boot-read:hover { color: var(--text); border-color: var(--line-strong); }
+
+/* ─── READ MODE ───────────────────────────────────────────────── */
+
+.doc-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 2rem;
+  padding: 14px 0;
+  background: linear-gradient(180deg, var(--void) 72%, transparent);
+}
+
+.doc-bar__mark {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--cyan);
+}
+
+.doc-bar__enter {
+  padding: 10px 17px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  color: var(--text-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.doc-bar__enter:hover { color: var(--text); border-color: var(--line-strong); }
+
+.doc-note {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line-soft);
+}
+
+@media (max-width: 860px) {
+  .note { gap: 0.9rem; }
+  .note-go { display: none; }
+  .prose { font-size: 0.96rem; }
+  .prose pre { font-size: 0.76rem; padding: 0.9rem 1rem; }
+  .boot-info { padding: 1rem; }
 }

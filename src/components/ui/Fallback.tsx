@@ -13,16 +13,32 @@ import { articles } from '@/data/lab'
  * way the content is presented, not the only place it exists — a visitor
  * without a GPU, a search crawler and a screen reader all get everything.
  */
-export function Fallback({ visible }: { visible: boolean }) {
+export function Fallback({
+  visible,
+  onEnterWorld,
+}: {
+  visible: boolean
+  /** Present in read mode, absent when WebGL simply is not available. */
+  onEnterWorld?: () => void
+}) {
   return (
-    <div className={visible ? 'doc' : 'doc is-offscreen'} aria-hidden={!visible ? undefined : undefined}>
+    <div className={visible ? 'doc' : 'doc is-offscreen'}>
+      {visible && onEnterWorld && (
+        <div className="doc-bar">
+          <p className="doc-bar__mark">{site.name}</p>
+          <button type="button" className="doc-bar__enter" onClick={onEnterWorld}>
+            EXPLORE IN 3D →
+          </button>
+        </div>
+      )}
+
       <header className="doc-head">
         <p className="doc-mark">{site.name}</p>
         <h1>
           {about.heading} — {about.role}
         </h1>
         <p className="doc-lead">{about.statement}</p>
-        {visible && (
+        {visible && !onEnterWorld && (
           <p className="doc-notice">
             This browser could not start WebGL, so the interactive station is
             unavailable. Everything it contains is below.
