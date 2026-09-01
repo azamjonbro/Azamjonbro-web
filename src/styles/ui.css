@@ -188,7 +188,7 @@
   transform: translateY(-6px);
 }
 
-.compass.is-hidden { transform: translateX(-50%) translateY(6px); }
+.compass.is-hidden { transform: translateY(6px); }
 
 @keyframes hud-in {
   from { opacity: 0; transform: translateY(-10px); }
@@ -362,9 +362,15 @@
 /* ─── COMPASS ─────────────────────────────────────────────────── */
 
 .compass {
-  left: 50%;
+  /* Centred with auto margins rather than a translate, so the entrance
+     animation and the hidden state are free to use `transform` without
+     having to remember to re-apply the centring. */
+  left: 0;
+  right: 0;
   bottom: 26px;
-  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 24px);
+  margin-inline: auto;
   display: flex;
   gap: 4px;
   padding: 6px;
@@ -373,14 +379,7 @@
   background: rgba(6, 9, 16, 0.6);
   backdrop-filter: blur(16px);
   pointer-events: auto;
-  /* Its own keyframes: `hud-in` finishes on `transform: none`, which would
-     discard the centring translate this element depends on. */
-  animation: compass-in 1s var(--glide) 0.8s both;
-}
-
-@keyframes compass-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-  to { opacity: 1; transform: translateX(-50%); }
+  animation: hud-in 1s var(--glide) 0.8s both;
 }
 
 .compass-item {
@@ -1335,7 +1334,8 @@
     left: 12px;
     right: 12px;
     bottom: 18px;
-    transform: none;
+    width: auto;
+    max-width: none;
     justify-content: flex-start;
     overflow-x: auto;
     scrollbar-width: none;
