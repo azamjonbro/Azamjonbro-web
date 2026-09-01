@@ -1,10 +1,12 @@
 import {
+  Fragment,
   useEffect,
   useRef,
   useState,
   type CSSProperties,
   type ReactNode,
 } from 'react'
+import { onObserverUnavailable, observerUnavailable } from '@/lib/reveal'
 import { registerSection } from '@/lib/scroll'
 import { useRoom } from '@/state/RoomContext'
 
@@ -66,21 +68,33 @@ export function Reveal({
   useEffect(() => {
     const node = ref.current
     if (!node || seen) return
-    if (reducedMotion) {
+    if (reducedMotion || observerUnavailable()) {
       setSeen(true)
       return
     }
 
+    /* If observation turns out not to work here, show rather than stay
+       hidden — see lib/reveal. */
+    const release = onObserverUnavailable(() => setSeen(true))
+
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting) return
+        /* Anything already above the viewport was arrived at by a jump — a
+           deep link, a nav click, a refresh part-way down the page. It will
+           never intersect on the way in, so revealing it on scroll alone
+           would leave it invisible for the rest of the visit. */
+        const passed = entry.boundingClientRect.bottom < 0
+        if (!entry.isIntersecting && !passed) return
         setSeen(true)
         io.disconnect()
       },
       { rootMargin: '0px 0px -12% 0px', threshold: 0.05 },
     )
     io.observe(node)
-    return () => io.disconnect()
+    return () => {
+      release()
+      io.disconnect()
+    }
   }, [seen, reducedMotion])
 
   return (
@@ -195,11 +209,16 @@ export function RiseText({
   return (
     <span className={`rise ${className}`}>
       {words.map((word, i) => (
-        <span className="rise-mask" key={`${word}-${i}`}>
-          <span className="rise-word" style={{ ['--d' as string]: `${delay + i * 70}ms` }}>
-            {word}
+        <Fragment key={`${word}-${i}`}>
+          {/* A real space, not a margin: the heading has to read as a
+              sentence to a screen reader and survive being copied. */}
+          {i > 0 && ' '}
+          <span className="rise-mask">
+            <span className="rise-word" style={{ ['--d' as string]: `${delay + i * 70}ms` }}>
+              {word}
+            </span>
           </span>
-        </span>
+        </Fragment>
       ))}
     </span>
   )

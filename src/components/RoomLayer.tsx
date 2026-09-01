@@ -1,7 +1,6 @@
 import { RoomScene } from '@/components/room/RoomScene'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { InfoPanel } from '@/components/ui/InfoPanel'
-import { Hint } from '@/components/ui/Hint'
 import { useRoom } from '@/state/RoomContext'
 
 /**
@@ -24,7 +23,6 @@ export default function RoomLayer() {
 
       <Tooltip />
       <InfoPanel />
-      <Hint />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { navItems, primaryNavIds, site } from '@/data/site'
-import { scroll, scrollToSection } from '@/lib/scroll'
+import { onScrollPosition, scrollToSection } from '@/lib/scroll'
 import { useRoom } from '@/state/RoomContext'
 
 const items = navItems.filter((n) => primaryNavIds.includes(n.id))
@@ -16,17 +16,12 @@ export function Nav() {
   const [condensed, setCondensed] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
-  /* Reading `scroll.y` on a rAF rather than a scroll listener keeps this on
-     the same clock as everything else, and the state only flips twice. */
-  useEffect(() => {
-    let raf = 0
-    const tick = () => {
-      setCondensed(scroll.y > window.innerHeight * 0.55)
-      raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [])
+  /* Subscribed rather than polled on a frame loop: this is discrete state a
+     visitor would notice going stale, and it must survive a throttled rAF. */
+  useEffect(
+    () => onScrollPosition((y) => setCondensed(y > window.innerHeight * 0.55)),
+    [],
+  )
 
   /* A menu left open behind a section change is a trap on a phone. */
   useEffect(() => {

@@ -12,7 +12,7 @@ import { Reveal, Section, SectionHead } from './Primitives'
  * screenshot arrives on the cursor instead of taking up permanent space.
  */
 export function Projects() {
-  const { showProject, isTouch } = useRoom()
+  const { showProject, isTouch, isMobile } = useRoom()
   const [hovered, setHovered] = useState<string | null>(null)
 
   return (
@@ -38,13 +38,13 @@ export function Projects() {
               active={hovered === project.id}
               onHover={() => setHovered(project.id)}
               onOpen={() => showProject(project.id)}
-              showInlineImage={isTouch}
+              showInlineImage={isTouch || isMobile}
             />
           </Reveal>
         ))}
       </ol>
 
-      {!isTouch && <CursorPreview activeId={hovered} />}
+      {!isTouch && !isMobile && <CursorPreview activeId={hovered} />}
     </Section>
   )
 }
@@ -162,7 +162,12 @@ function CursorPreview({ activeId }: { activeId: string | null }) {
           key={p.id}
           src={p.image}
           alt=""
-          loading="lazy"
+          /* Not lazy: these live in a fixed, transparent container that a
+             lazy loader has no reason to consider visible, so the first
+             hover would land on an image that had not started downloading.
+             Low priority instead — they queue behind everything that is
+             actually on screen. */
+          fetchPriority="low"
           decoding="async"
           className={activeId === p.id ? 'is-shown' : ''}
           style={{ ['--accent' as string]: p.accent }}

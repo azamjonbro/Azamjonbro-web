@@ -89,7 +89,7 @@ export const CAMERA = {
   shots: [
     /* 0 · home — the hero. Identical to `room`, so entering the page and
        sitting at stage 0 cannot disagree by a pixel. */
-    shot([0.2, 1.48, 2.25], [0.05, 1.22, -1.6], 38),
+    shot([0.2, 1.5, 2.62], [0.05, 1.22, -1.6], 40),
     /* 1 · projects — swing left onto the wall panels. */
     shot([-0.35, 1.66, 1.5], [-1.25, 1.5, -1.72], 42),
     /* 2 · about — in close over the desk from the right. */

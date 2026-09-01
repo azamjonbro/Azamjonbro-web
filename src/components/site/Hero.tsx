@@ -43,7 +43,7 @@ export function Hero() {
         </p>
 
         <h1 className="hero-title">
-          <RiseText text={site.hero.line1} delay={120} />
+          <RiseText text={site.hero.line1} delay={120} />{' '}
           <RiseText text={site.hero.line2} className="hero-title__accent" delay={260} />
         </h1>
 

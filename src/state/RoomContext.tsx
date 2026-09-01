@@ -43,9 +43,6 @@ interface RoomContextValue {
   openResume: () => void
   closeResume: () => void
 
-  /** Objects the visitor has already clicked — drives the discovery counter. */
-  discovered: ObjectId[]
-
   audioOn: boolean
   toggleAudio: () => void
 
@@ -126,10 +123,13 @@ export function RoomProvider({ children }: { children: ReactNode }) {
   const [selectedId, setSelectedId] = useState<ObjectId | null>(null)
   const [view, setView] = useState<ViewMode>('room')
   const [resumeOpen, setResumeOpen] = useState(false)
-  const [discovered, setDiscovered] = useState<ObjectId[]>([])
   const [audioOn, setAudioOn] = useState(false)
   const [ringLightBoost, setRingLightBoost] = useState(false)
-  const [editMode, setEditMode] = useState(false)
+  const [editMode, setEditMode] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).has('edit'),
+  )
   const [editing, setEditing] = useState<MovableId | null>(null)
   const [dragging, setDragging] = useState(false)
   const [layout, setLayout] = useState<Record<MovableId, Placement>>(loadLayout)
@@ -188,14 +188,12 @@ export function RoomProvider({ children }: { children: ReactNode }) {
     setSelectedId(id)
     if (!id) return
     uiSounds.click()
-    setDiscovered((prev) => (prev.includes(id) ? prev : [...prev, id]))
   }, [])
 
   const enterComputer = useCallback(() => {
     uiSounds.click()
     setSelectedId(null)
     setView('computer')
-    setDiscovered((prev) => (prev.includes('monitor') ? prev : [...prev, 'monitor']))
   }, [])
 
   const exitComputer = useCallback(() => setView('room'), [])
@@ -204,7 +202,6 @@ export function RoomProvider({ children }: { children: ReactNode }) {
     uiSounds.click()
     setSelectedId(null)
     setResumeOpen(true)
-    setDiscovered((prev) => (prev.includes('macbook') ? prev : [...prev, 'macbook']))
   }, [])
 
   const closeResume = useCallback(() => setResumeOpen(false), [])
@@ -327,7 +324,6 @@ export function RoomProvider({ children }: { children: ReactNode }) {
       resumeOpen,
       openResume,
       closeResume,
-      discovered,
       audioOn,
       toggleAudio,
       ringLightBoost,
@@ -367,7 +363,6 @@ export function RoomProvider({ children }: { children: ReactNode }) {
       resumeOpen,
       openResume,
       closeResume,
-      discovered,
       audioOn,
       toggleAudio,
       ringLightBoost,

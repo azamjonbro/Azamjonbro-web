@@ -177,7 +177,6 @@
   overflow: hidden;
   vertical-align: bottom;
   padding-bottom: 0.08em;
-  margin-right: 0.24em;
 }
 
 .rise-word {
@@ -1856,7 +1855,13 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .proc-sticky { position: static; }
+  /* Un-sticking the panel would just print the active step twice, directly
+     above the list that already contains it. The list carries it alone. */
+  .proc-sticky { display: none; }
+
+  .proc-steps { border-top: 0; }
+  .proc-step__hit { opacity: 1; }
+
   .build-card.is-wide { grid-column: span 1; }
 }
 

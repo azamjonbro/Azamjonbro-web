@@ -193,7 +193,9 @@ export function RoomScene() {
   return (
     <div className="room-canvas">
       <Canvas
-        shadows={lightweight ? false : 'soft'}
+        /* 'soft' maps to PCFSoftShadowMap, which three deprecated in r185
+           and now warns about on every boot. PCF is the supported filter. */
+        shadows={lightweight ? false : 'percentage'}
         dpr={lightweight ? [1, 1.5] : [1, 2]}
         camera={{
           position: CAMERA.room.position.toArray(),

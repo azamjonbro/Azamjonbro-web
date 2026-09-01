@@ -11,10 +11,6 @@ import Lenis from 'lenis'
 export const scroll = {
   /** Pixels from the top of the document. */
   y: 0,
-  /** 0 → 1 across the whole scrollable document. */
-  progress: 0,
-  /** Pixels per frame, signed. Used for the velocity-driven skew. */
-  velocity: 0,
   /**
    * Position along the section list as a float: the integer part is the
    * section, the fraction is the eased transition into the next one.
@@ -23,8 +19,6 @@ export const scroll = {
   stage: 0,
   /** The section the visitor is currently reading. */
   section: 0,
-  /** True once the page has been scrolled at all. */
-  moved: false,
 }
 
 /* ─── SECTION REGISTRY ────────────────────────────────────────── */
@@ -33,14 +27,13 @@ interface Tracked {
   id: string
   el: HTMLElement
   top: number
-  height: number
 }
 
 /** Document order is authoritative, so entries are re-sorted on measure. */
 let tracked: Tracked[] = []
 
 export function registerSection(id: string, el: HTMLElement) {
-  tracked.push({ id, el, top: 0, height: 0 })
+  tracked.push({ id, el, top: 0 })
   measureSections()
   return () => {
     tracked = tracked.filter((t) => t.el !== el)
@@ -49,9 +42,7 @@ export function registerSection(id: string, el: HTMLElement) {
 
 export function measureSections() {
   for (const t of tracked) {
-    const box = t.el.getBoundingClientRect()
-    t.top = box.top + window.scrollY
-    t.height = box.height
+    t.top = t.el.getBoundingClientRect().top + window.scrollY
   }
   tracked.sort((a, b) => a.top - b.top)
 }
@@ -61,28 +52,26 @@ const ease = (t: number) => t * t * (3 - 2 * t)
 
 /**
  * Where the camera should be, given a scroll position.
- * The anchor sits above the viewport centre so a section "arrives"
- * as its heading reaches comfortable reading height.
+ *
+ * The move is timed against the viewport rather than against the section:
+ * a shot is held until the next section is within roughly a screen of the
+ * top, then eases across so it arrives exactly as that section does. Timing
+ * it against the section instead would make the camera drift for the entire
+ * length of a long section and snap through a short one.
  */
 function computeStage(y: number) {
-  if (tracked.length === 0) return 0
-  const anchor = y + window.innerHeight * 0.42
-
-  if (anchor <= tracked[0].top) return 0
   const last = tracked.length - 1
-  if (anchor >= tracked[last].top) return last
+  if (last < 1) return 0
+  if (y >= tracked[last].top) return last
 
   for (let i = 0; i < last; i++) {
-    const a = tracked[i]
-    const b = tracked[i + 1]
-    if (anchor < b.top) {
-      const span = b.top - a.top
-      const f = span > 0 ? (anchor - a.top) / span : 0
-      /* Hold the shot through the body of the section, then move.
-         Without this the camera never rests anywhere. */
-      const shaped = f < 0.45 ? 0 : ease((f - 0.45) / 0.55)
-      return i + shaped
-    }
+    const nextTop = tracked[i + 1].top
+    if (y >= nextTop) continue
+
+    const span = nextTop - tracked[i].top
+    const travel = Math.min(span, window.innerHeight * 0.85)
+    const f = (y - (nextTop - travel)) / travel
+    return f <= 0 ? i : i + ease(Math.min(1, f))
   }
 
   return last
@@ -95,11 +84,26 @@ const listeners = new Set<Listener>()
 
 export function onSectionChange(fn: Listener) {
   listeners.add(fn)
-  return () => listeners.delete(fn)
+  return () => {
+    listeners.delete(fn)
+  }
 }
 
-export function sectionIndexOf(id: string) {
-  return tracked.findIndex((t) => t.id === id)
+/**
+ * For discrete UI that follows the scroll position — the condensed
+ * navigation, and anything else whose state a visitor would notice going
+ * stale. Continuous, per-frame motion should read `scroll` from a frame
+ * loop instead of subscribing here.
+ */
+type PositionListener = (y: number) => void
+const positionListeners = new Set<PositionListener>()
+
+export function onScrollPosition(fn: PositionListener) {
+  positionListeners.add(fn)
+  fn(scroll.y)
+  return () => {
+    positionListeners.delete(fn)
+  }
 }
 
 /* ─── THE LOOP ────────────────────────────────────────────────── */
@@ -128,20 +132,19 @@ export function startScroll(reducedMotion: boolean) {
     })
   }
 
-  let previous = window.scrollY
-
-  const tick = (time: number) => {
-    lenis?.raf(time)
-
+  /**
+   * Recomputes everything derived from the scroll position.
+   *
+   * Called from the frame loop, which is what the camera needs, and also
+   * from the native scroll event, which fires even when requestAnimationFrame
+   * is being throttled — a backgrounded tab, a low-power device, a browser
+   * that has stopped painting. Without the second path the navigation's
+   * active section would silently freeze while the page kept scrolling.
+   */
+  const sample = () => {
     const y = window.scrollY
-    const limit = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
-
-    scroll.velocity = y - previous
-    previous = y
     scroll.y = y
-    scroll.progress = Math.min(1, y / limit)
     scroll.stage = computeStage(y)
-    if (y > 4) scroll.moved = true
 
     const next = Math.round(scroll.stage)
     if (next !== scroll.section) {
@@ -149,19 +152,34 @@ export function startScroll(reducedMotion: boolean) {
       for (const fn of listeners) fn(next)
     }
 
+    for (const fn of positionListeners) fn(y)
+  }
+
+  const tick = (time: number) => {
+    lenis?.raf(time)
+    sample()
     raf = requestAnimationFrame(tick)
   }
 
   raf = requestAnimationFrame(tick)
+  window.addEventListener('scroll', sample, { passive: true })
+  sample()
 
-  const onResize = () => measureSections()
+  const onResize = () => {
+    measureSections()
+    sample()
+  }
   window.addEventListener('resize', onResize)
   /* Late-loading images and fonts move every section below them. */
-  const settle = setTimeout(measureSections, 600)
+  const settle = setTimeout(() => {
+    measureSections()
+    sample()
+  }, 600)
 
   cleanup = () => {
     cancelAnimationFrame(raf)
     clearTimeout(settle)
+    window.removeEventListener('scroll', sample)
     window.removeEventListener('resize', onResize)
     lenis?.destroy()
     lenis = null
