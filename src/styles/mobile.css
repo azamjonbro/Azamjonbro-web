@@ -1,0 +1,472 @@
+/* ─── MOBILE LANDING ──────────────────────────────────────────────
+   The phone build never boots the 3D room. It gets a normal portfolio
+   page on the same palette: #06060b with the purple glow the room is
+   lit by. Own stylesheet so it stays clear of the room's chrome.     */
+
+/* The room locks the document; the landing needs to scroll. Scoped to
+   a class the landing sets on <html> so global.css stays untouched. */
+html.is-landing,
+html.is-landing body {
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: none;
+}
+
+html.is-landing #root {
+  height: auto;
+}
+
+.ml {
+  --gutter: clamp(1.15rem, 5.5vw, 2rem);
+  position: relative;
+  min-height: 100%;
+  padding-bottom: 3rem;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  color: var(--ink);
+}
+
+/* ─── BACKGROUND ───────────────────────────────────────────────────
+   Fixed so it never repaints while scrolling. Two purple pools and a
+   cold rim, mirroring the room's key light and window.               */
+.ml-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 62% at 78% -8%, rgba(139, 92, 246, 0.28) 0%, transparent 62%),
+    radial-gradient(90% 50% at 6% 22%, rgba(59, 111, 216, 0.18) 0%, transparent 58%),
+    radial-gradient(120% 70% at 50% 112%, rgba(139, 92, 246, 0.14) 0%, transparent 60%),
+    var(--bg);
+}
+
+/* Faint grid, the same one the room's floor implies. */
+.ml-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(120% 80% at 50% 0%, #000 0%, transparent 72%);
+}
+
+/* ─── HEADER ─── */
+.ml-head {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: max(0.75rem, env(safe-area-inset-top)) var(--gutter) 0.75rem;
+  background: linear-gradient(180deg, rgba(6, 6, 11, 0.92) 40%, rgba(6, 6, 11, 0));
+  backdrop-filter: blur(10px);
+}
+
+.ml-wordmark {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ml-wordmark span { color: var(--accent-soft); }
+
+/* ─── BUTTONS ─── */
+.ml-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.62rem 1.05rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--hair-strong);
+  border-radius: 10px;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.ml-btn:active { transform: scale(0.97); }
+
+.ml-btn--primary {
+  color: #0b0716;
+  background: linear-gradient(180deg, var(--accent-soft), var(--accent));
+  border-color: transparent;
+  box-shadow: 0 8px 26px -10px rgba(139, 92, 246, 0.8);
+}
+
+.ml-btn--sm { padding: 0.45rem 0.8rem; font-size: 0.75rem; }
+
+/* ─── SECTION SCAFFOLD ─── */
+.ml-section {
+  padding: 3.25rem var(--gutter) 0;
+  /* Clears the sticky header when jumped to via #work. */
+  scroll-margin-top: 3.5rem;
+}
+
+.ml-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 1.15rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.ml-eyebrow::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--hair), transparent);
+}
+
+.ml-h2 {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: clamp(1.5rem, 7vw, 2rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+.ml-body {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+/* ─── HERO ─── */
+.ml-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 82svh;
+  padding: 2rem var(--gutter) 3rem;
+}
+
+.ml-status {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.35rem 0.75rem 0.35rem 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-soft);
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.28);
+  border-radius: 999px;
+}
+
+.ml-status i {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-soft);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--accent);
+  animation: ml-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes ml-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+
+.ml-name {
+  margin: 0 0 1rem;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: clamp(2.6rem, 15vw, 4.2rem);
+  font-weight: 700;
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+  background: linear-gradient(150deg, #ffffff 12%, #b9a8ee 62%, #6d5bb0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.ml-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.35rem;
+}
+
+.ml-role {
+  padding: 0.3rem 0.65rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--hair);
+  border-radius: 7px;
+}
+
+.ml-tagline {
+  max-width: 22ch;
+  margin: 0 0 2rem;
+  font-size: clamp(1.05rem, 4.6vw, 1.3rem);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: #cdd0e2;
+}
+
+.ml-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+/* ─── ABOUT / MANIFESTO ─── */
+.ml-manifesto {
+  margin: 1.6rem 0 0;
+  padding-left: 1rem;
+  border-left: 2px solid rgba(139, 92, 246, 0.45);
+  list-style: none;
+}
+
+.ml-manifesto li {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.75;
+  color: #b8bcd0;
+}
+
+.ml-manifesto li:last-child { color: var(--accent-soft); }
+
+/* ─── STACK ─── */
+.ml-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ml-stack__label {
+  margin: 0 0 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.ml-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ml-chip {
+  padding: 0.34rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #c3c7da;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--hair);
+  border-radius: 8px;
+}
+
+/* ─── PROJECTS ─── */
+.ml-projects {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.ml-card {
+  position: relative;
+  overflow: hidden;
+  padding: 1.25rem 1.15rem 1.35rem;
+  background: rgba(16, 16, 24, 0.62);
+  border: 1px solid var(--hair);
+  border-radius: 14px;
+}
+
+/* Each project keeps the accent it has in the room. */
+.ml-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-c), transparent 70%);
+}
+
+.ml-card__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.15rem;
+}
+
+.ml-card__cat {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-c);
+}
+
+.ml-card__year {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--dim);
+}
+
+.ml-card__title {
+  margin: 0.35rem 0 0.15rem;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.ml-card__sub {
+  margin: 0 0 0.7rem;
+  font-size: 0.8rem;
+  color: var(--dim);
+}
+
+.ml-card__desc {
+  margin: 0 0 0.95rem;
+  font-size: 0.89rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.ml-card__features {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.ml-card__features li {
+  position: relative;
+  padding-left: 1.05rem;
+  font-size: 0.84rem;
+  line-height: 1.75;
+  color: #a9adc2;
+}
+
+.ml-card__features li::before {
+  content: "";
+  position: absolute;
+  top: 0.68em;
+  left: 0.1rem;
+  width: 4px;
+  height: 4px;
+  background: var(--accent-c);
+  border-radius: 50%;
+}
+
+.ml-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-c);
+  background: none;
+  border: 0;
+}
+
+/* ─── CONTACT ─── */
+.ml-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 1.5rem;
+}
+
+.ml-link {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.95rem 1.1rem;
+  color: var(--ink);
+  text-decoration: none;
+  background: rgba(16, 16, 24, 0.62);
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.ml-link:active {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.45);
+}
+
+.ml-link__k {
+  flex: 0 0 5.2rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.ml-link__v {
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.ml-link__go {
+  margin-left: auto;
+  color: var(--accent-soft);
+}
+
+/* ─── FOOTER ─── */
+.ml-foot {
+  margin-top: 3.5rem;
+  padding: 1.5rem var(--gutter) max(1.5rem, env(safe-area-inset-bottom));
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: center;
+  border-top: 1px solid var(--hair);
+}
+
+/* ─── SCROLL REVEAL ─── */
+.ml-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 0.84, 0.34, 1);
+}
+
+.ml-reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-reveal { opacity: 1; transform: none; transition: none; }
+  .ml-status i { animation: none; }
+}

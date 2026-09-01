@@ -19,6 +19,9 @@ export type MovableId =
   | 'clock'
   | 'ringLight'
   | 'chair'
+  | 'swisswatch'
+  | 'hadiya'
+  | 'ctf'
 
 export type Vec3 = [number, number, number]
 
@@ -111,6 +114,24 @@ export const defaultPlacements: Record<MovableId, Placement> = {
     rotation: [0, Math.PI - 0.66, 0],
     plane: 'floor',
     label: 'Chair',
+  },
+  swisswatch: {
+    position: [-1.45, 2.02, -1.76],
+    rotation: [0, 0, 0],
+    plane: 'wall',
+    label: 'SwissWatch display',
+  },
+  hadiya: {
+    position: [-1.45, 1.55, -1.76],
+    rotation: [0, 0, 0],
+    plane: 'wall',
+    label: 'Hadiya display',
+  },
+  ctf: {
+    position: [-1.45, 1.08, -1.76],
+    rotation: [0, 0, 0],
+    plane: 'wall',
+    label: 'CTF display',
   },
 }
 

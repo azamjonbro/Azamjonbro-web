@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import * as THREE from 'three'
 import { DESK } from '@/lib/layout'
 import { createMarbleTexture, createNoiseRoughness } from '@/lib/textures'
-import { useProceduralTexture } from '@/hooks/useTexture'
 
 /**
  * Marble-topped desk on a black steel frame, with the desk mat,
@@ -14,7 +13,7 @@ export function Desk() {
     t.repeat.set(1.6, 1)
     return t
   }, [])
-  const marbleRough = useProceduralTexture(() => createNoiseRoughness(60, 40))
+  const marbleRough = useMemo(() => createNoiseRoughness(60, 40), [])
 
   const { width, depth, top, thickness } = DESK
   const halfW = width / 2

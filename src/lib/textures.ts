@@ -352,28 +352,28 @@ interface WallDisplaySpec {
 }
 
 const wallSpecs: Record<string, WallDisplaySpec> = {
-  swisswatchpremium: {
-    title: 'Swiss Watch',
-    subtitle: 'Luxury Timepiece\nHouse',
-    meta: 'React · TypeScript · Nginx',
+  swisswatch: {
+    title: 'SwissWatch',
+    subtitle: 'Luxury Watch\nE-Commerce Platform',
+    meta: 'React · Node.js · MongoDB',
     accent: '#c8a86b',
   },
-  algoritmedu: {
-    title: 'Algoritm',
-    subtitle: 'IT Education\nPlatform',
+  hadiya: {
+    title: 'Hadiya',
+    subtitle: 'AI-Powered\nPOS System',
     meta: 'Vue · Node.js · MongoDB',
-    accent: '#4f9dff',
+    accent: '#a78bfa',
   },
-  spring: {
-    title: 'Spring',
-    subtitle: 'Corporate\nLMS',
+  ctf: {
+    title: 'CTF Platform',
+    subtitle: 'Cybersecurity\nChallenge Platform',
     meta: 'React · Node.js · PostgreSQL',
-    accent: '#ff7a59',
+    accent: '#38bdf8',
   },
 }
 
 export function createWallDisplayTexture(id: string) {
-  const spec = wallSpecs[id] ?? wallSpecs.swisswatchpremium
+  const spec = wallSpecs[id] ?? wallSpecs.swisswatch
   const { el, ctx } = canvas2d(1024, 590)
 
   ctx.fillStyle = '#07080e'

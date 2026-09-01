@@ -1,5 +1,3 @@
-import { projects } from './projects'
-
 export type Language = 'tsx' | 'ts' | 'css' | 'json' | 'md'
 
 export interface VFile {
@@ -297,28 +295,89 @@ export function useCameraInteraction() {
       file(
         'projects.ts',
         'ts',
-        `export const projects = [\n${projects
-          .map(
-            (p) =>
-              `  {\n    id: '${p.id}',\n    title: '${p.title}',\n` +
-              `    category: '${p.category}',\n` +
-              `    technologies: [${p.technologies.map((t) => `'${t}'`).join(', ')}],\n  },`,
-          )
-          .join('\n')}\n]\n`,
+        `
+export const projects = [
+  {
+    id: 'swisswatch',
+    title: 'SwissWatch',
+    category: 'E-Commerce',
+    technologies: ['React', 'Node.js', 'MongoDB', 'Three.js'],
+  },
+  {
+    id: 'hadiya',
+    title: 'Hadiya',
+    category: 'AI / Business',
+    technologies: ['Vue', 'Node.js', 'MongoDB', 'AI Automation'],
+  },
+  {
+    id: 'ctf',
+    title: 'CTF Platform',
+    category: 'Cybersecurity',
+    technologies: ['React', 'Node.js', 'PostgreSQL', 'Docker'],
+  },
+]
+`,
         'projects',
       ),
-      ...projects.map((p) =>
-        file(
-          `${p.id}.ts`,
-          'ts',
-          `/**\n * ${p.title} — ${p.subtitle}.\n` +
-            `${p.domain ? ` * Live at ${p.domain}.\n` : ''}` +
-            ` * Open this file to read the case study.\n */\n` +
-            `export const ${p.id.replace(/-/g, '_')} = {\n` +
-            `  stack: [${p.technologies.map((t) => `'${t}'`).join(', ')}],\n\n` +
-            `  features: [\n${p.features.map((f) => `    '${f.replace(/'/g, "\\'")}',`).join('\n')}\n  ],\n}\n`,
-          p.id,
-        ),
+      file(
+        'swisswatch.ts',
+        'ts',
+        `
+/**
+ * SwissWatch - luxury watch e-commerce.
+ * Click to open the full project panel.
+ */
+export const swisswatch = {
+  stack: ['React', 'Node.js', 'MongoDB', 'Three.js'],
+
+  features: [
+    '3D watch configurator with real-time materials',
+    'Faceted catalog search',
+    'Stripe checkout with order lifecycle emails',
+  ],
+}
+`,
+        'swisswatch',
+      ),
+      file(
+        'hadiya.ts',
+        'ts',
+        `
+/**
+ * Hadiya - AI-powered POS system.
+ * Click to open the full project panel.
+ */
+export const hadiya = {
+  stack: ['Vue', 'Node.js', 'MongoDB', 'AI Automation'],
+
+  features: [
+    'Offline-first point of sale',
+    'AI demand forecasting',
+    'Automated daily business summaries',
+  ],
+}
+`,
+        'hadiya',
+      ),
+      file(
+        'ctf.ts',
+        'ts',
+        `
+/**
+ * CTF Platform - cybersecurity challenges.
+ * Click to open the full project panel.
+ */
+export const ctf = {
+  stack: ['React', 'Node.js', 'PostgreSQL', 'Docker'],
+
+  features: [
+    'Per-team isolated challenge containers',
+    'Live websocket scoreboard',
+    'Writeup submission and review',
+  ],
+}
+`,
+        'ctf',
       ),
     ]),
 

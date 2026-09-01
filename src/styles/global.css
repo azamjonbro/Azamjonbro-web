@@ -45,27 +45,19 @@
   box-sizing: border-box;
 }
 
-html {
-  /* Lenis owns the scroll animation; the native one would fight it. */
-  scroll-behavior: auto;
-  overscroll-behavior-y: none;
-}
-
+html,
 body {
   margin: 0;
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans), system-ui, sans-serif;
-  font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Set while a sheet is open, so the page behind it cannot scroll away. */
-html.is-locked,
-html.is-locked body {
-  overflow: hidden;
+#root {
+  height: 100%;
 }
 
 button {
@@ -77,27 +69,108 @@ button {
 }
 
 /* ─── CANVAS ──────────────────────────────────────────────────── */
-
-/**
- * The room sits behind the entire document, not just the hero, so the
- * camera can keep moving while the visitor reads. It only accepts the
- * pointer while the hero owns the viewport — below that every click, and
- * every raycast the pointer would have triggered, belongs to the page.
- */
-.room-layer {
+.room-canvas {
   position: fixed;
   inset: 0;
   z-index: 0;
+}
+
+/* ─── TOP CHROME ──────────────────────────────────────────────── */
+.hud {
+  position: fixed;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   pointer-events: none;
 }
 
-.room-layer.is-live {
-  pointer-events: auto;
+.hud-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 22px 30px;
 }
 
-.room-canvas {
-  position: absolute;
-  inset: 0;
+.hud-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hud-brand-mark {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 14px var(--accent);
+}
+
+.hud-brand-name {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.hud-brand-role {
+  color: var(--dim);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  padding-left: 10px;
+  border-left: 1px solid var(--hair);
+}
+
+.hud-counter {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+}
+
+.hud-counter-value {
+  color: var(--accent-soft);
+  font-size: 13px;
+}
+
+.hud-exit {
+  position: fixed;
+  z-index: 45;
+  left: 30px;
+  bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  background: var(--glass);
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  backdrop-filter: blur(20px) saturate(150%);
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+
+.hud-exit:hover {
+  border-color: var(--hair-strong);
+  transform: translateY(-1px);
+}
+
+.hud-exit kbd {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  color: var(--muted);
+  border: 1px solid var(--hair);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 /* ─── TOOLTIP ─────────────────────────────────────────────────── */
@@ -246,14 +319,10 @@ button {
   background: #08090f;
 }
 
-.panel-visual img {
+.panel-visual svg {
   display: block;
   width: 100%;
   height: 100%;
-  /* The plate is 16:10 and the panel strip is much wider than that, so it
-     is cropped to the top where the title and chrome sit. */
-  object-fit: cover;
-  object-position: 50% 22%;
 }
 
 .panel-block {
@@ -371,6 +440,43 @@ button {
   color: var(--dim);
 }
 
+/* ─── HINT ────────────────────────────────────────────────────── */
+.hint {
+  position: fixed;
+  z-index: 35;
+  left: 50%;
+  bottom: 42px;
+  transform: translate(-50%, 12px);
+  display: grid;
+  gap: 5px;
+  padding: 14px 22px;
+  text-align: center;
+  border-radius: 14px;
+  background: rgba(10, 11, 19, 0.6);
+  border: 1px solid var(--hair);
+  backdrop-filter: blur(18px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hint.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.hint p {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.hint-key {
+  color: var(--ink);
+}
+
 /* ─── LOADING SCREEN ──────────────────────────────────────────── */
 .loader {
   position: fixed;
@@ -396,14 +502,13 @@ button {
 .loader-brand {
   margin: 0;
   font-family: var(--font-display), sans-serif;
-  font-size: 26px;
-  font-weight: 500;
-  letter-spacing: -0.03em;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.34em;
 }
 
 .loader-status {
-  margin: 10px 0 26px;
-  text-transform: uppercase;
+  margin: 12px 0 26px;
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.24em;
@@ -425,15 +530,46 @@ button {
   transition: width 0.35s ease;
 }
 
-.loader-meta {
-  margin: 22px 0 0;
+.loader-ascii {
+  margin: 14px 0 26px;
   font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: #3a3e52;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--accent-soft);
 }
 
+.loader-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.loader-steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  transition: color 0.3s ease;
+}
+
+.loader-steps li.is-done {
+  color: var(--muted);
+}
+
+.loader-step-mark {
+  width: 12px;
+  color: var(--dim);
+}
+
+.loader-steps li.is-done .loader-step-mark {
+  color: #4ade80;
+}
+
+/* ═══ VIRTUAL MACHINE (rendered inside the monitor) ═══════════════ */
 .vm-shell {
   position: relative;
   width: 100%;

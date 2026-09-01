@@ -16,7 +16,6 @@ import {
   type Vec3,
 } from '@/data/placements'
 import { ambientAudio } from '@/lib/ambientAudio'
-import { onSectionChange, setScrollLocked, startScroll, stopScroll } from '@/lib/scroll'
 import { uiSounds } from '@/lib/uiSounds'
 
 /** Where the camera is currently parked. */
@@ -43,6 +42,9 @@ interface RoomContextValue {
   openResume: () => void
   closeResume: () => void
 
+  /** Objects the visitor has already clicked — drives the discovery counter. */
+  discovered: ObjectId[]
+
   audioOn: boolean
   toggleAudio: () => void
 
@@ -50,19 +52,7 @@ interface RoomContextValue {
   toggleRingLight: () => void
 
   isMobile: boolean
-  /** No hover, no fine pointer — phones and tablets. */
-  isTouch: boolean
   reducedMotion: boolean
-
-  /** Index into `navItems`, driven by scroll. Nav and canvas both read it. */
-  activeSection: number
-  /** True while the hero owns the viewport, so the room accepts the pointer. */
-  roomLive: boolean
-
-  /** The open project case study, or null. */
-  openProject: string | null
-  showProject: (id: string) => void
-  closeProject: () => void
 
   /* ─── LAYOUT EDITOR ─── */
   /** Rearrange mode: props can be dragged and rotated instead of inspected. */
@@ -123,23 +113,15 @@ export function RoomProvider({ children }: { children: ReactNode }) {
   const [selectedId, setSelectedId] = useState<ObjectId | null>(null)
   const [view, setView] = useState<ViewMode>('room')
   const [resumeOpen, setResumeOpen] = useState(false)
+  const [discovered, setDiscovered] = useState<ObjectId[]>([])
   const [audioOn, setAudioOn] = useState(false)
   const [ringLightBoost, setRingLightBoost] = useState(false)
-  const [editMode, setEditMode] = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      new URLSearchParams(window.location.search).has('edit'),
-  )
+  const [editMode, setEditMode] = useState(false)
   const [editing, setEditing] = useState<MovableId | null>(null)
   const [dragging, setDragging] = useState(false)
   const [layout, setLayout] = useState<Record<MovableId, Placement>>(loadLayout)
-  const [activeSection, setActiveSection] = useState(0)
-  const [openProject, setOpenProject] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== 'undefined' && window.innerWidth < 900,
-  )
-  const [isTouch, setIsTouch] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches,
   )
   const [reducedMotion, setReducedMotion] = useState(
     () =>
@@ -155,32 +137,11 @@ export function RoomProvider({ children }: { children: ReactNode }) {
     const onMotion = () => setReducedMotion(mq.matches)
     mq.addEventListener('change', onMotion)
 
-    const touch = window.matchMedia('(hover: none)')
-    const onTouch = () => setIsTouch(touch.matches)
-    touch.addEventListener('change', onTouch)
-
     return () => {
       window.removeEventListener('resize', onResize)
       mq.removeEventListener('change', onMotion)
-      touch.removeEventListener('change', onTouch)
     }
   }, [])
-
-  /* Smooth scrolling and the frame loop that feeds the camera. Started here
-     rather than in a component so it outlives every section unmounting. */
-  useEffect(() => {
-    startScroll(reducedMotion)
-    const off = onSectionChange(setActiveSection)
-    return () => {
-      off()
-      stopScroll()
-    }
-  }, [reducedMotion])
-
-  /* One writer for the page lock, so two overlays cannot fight over it. */
-  useEffect(() => {
-    setScrollLocked(resumeOpen || openProject !== null)
-  }, [resumeOpen, openProject])
 
   const hover = useCallback((id: ObjectId | null) => setHoveredId(id), [])
 
@@ -188,12 +149,14 @@ export function RoomProvider({ children }: { children: ReactNode }) {
     setSelectedId(id)
     if (!id) return
     uiSounds.click()
+    setDiscovered((prev) => (prev.includes(id) ? prev : [...prev, id]))
   }, [])
 
   const enterComputer = useCallback(() => {
     uiSounds.click()
     setSelectedId(null)
     setView('computer')
+    setDiscovered((prev) => (prev.includes('monitor') ? prev : [...prev, 'monitor']))
   }, [])
 
   const exitComputer = useCallback(() => setView('room'), [])
@@ -202,30 +165,14 @@ export function RoomProvider({ children }: { children: ReactNode }) {
     uiSounds.click()
     setSelectedId(null)
     setResumeOpen(true)
+    setDiscovered((prev) => (prev.includes('macbook') ? prev : [...prev, 'macbook']))
   }, [])
 
   const closeResume = useCallback(() => setResumeOpen(false), [])
 
-  const showProject = useCallback((id: string) => {
-    uiSounds.click()
-    setOpenProject(id)
-  }, [])
-  const closeProject = useCallback(() => setOpenProject(null), [])
-
   const finishLoading = useCallback(() => {
     setProgress(100)
     setLoading(false)
-  }, [])
-
-  /* The curtain has to lift even when the room never arrives: a device that
-     cannot get a WebGL context never mounts the canvas, and a timer living
-     inside it would never run. This one is owned by the page. */
-  useEffect(() => {
-    const bail = setTimeout(() => {
-      setProgress(100)
-      setLoading(false)
-    }, 2600)
-    return () => clearTimeout(bail)
   }, [])
 
   const toggleAudio = useCallback(() => {
@@ -300,13 +247,12 @@ export function RoomProvider({ children }: { children: ReactNode }) {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       if (resumeOpen) setResumeOpen(false)
-      else if (openProject) setOpenProject(null)
       else if (selectedId) setSelectedId(null)
       else if (view === 'computer') setView('room')
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [selectedId, view, resumeOpen, openProject])
+  }, [selectedId, view, resumeOpen])
 
   const value = useMemo<RoomContextValue>(
     () => ({
@@ -324,18 +270,13 @@ export function RoomProvider({ children }: { children: ReactNode }) {
       resumeOpen,
       openResume,
       closeResume,
+      discovered,
       audioOn,
       toggleAudio,
       ringLightBoost,
       toggleRingLight,
       isMobile,
-      isTouch,
       reducedMotion,
-      activeSection,
-      roomLive: activeSection === 0 && !isTouch && openProject === null && !resumeOpen,
-      openProject,
-      showProject,
-      closeProject,
       editMode,
       toggleEditMode,
       editing,
@@ -363,17 +304,13 @@ export function RoomProvider({ children }: { children: ReactNode }) {
       resumeOpen,
       openResume,
       closeResume,
+      discovered,
       audioOn,
       toggleAudio,
       ringLightBoost,
       toggleRingLight,
       isMobile,
-      isTouch,
       reducedMotion,
-      activeSection,
-      openProject,
-      showProject,
-      closeProject,
       editMode,
       toggleEditMode,
       editing,

@@ -35,9 +35,16 @@ function LoadProgress() {
 
   useEffect(() => {
     if (!loading || active) return
-    const timer = setTimeout(finishLoading, 350)
+    const timer = setTimeout(finishLoading, 500)
     return () => clearTimeout(timer)
   }, [active, loading, finishLoading])
+
+  /* Nothing in the room is worth a permanent loading screen. */
+  useEffect(() => {
+    if (!loading) return
+    const bail = setTimeout(finishLoading, 8000)
+    return () => clearTimeout(bail)
+  }, [loading, finishLoading])
 
   return null
 }
@@ -93,8 +100,6 @@ function RoomEnvironment() {
 }
 
 function RoomContents() {
-  const { isTouch } = useRoom()
-
   return (
     <>
       <Lighting />
@@ -104,10 +109,7 @@ function RoomContents() {
       <Movable id="monitor">
         <MonitorArm />
         <MonitorBody />
-        {/* A real DOM tree rendered in 3D is the most expensive thing in the
-            room and needs a cursor to be worth anything. Touch gets the panel
-            without the machine behind it. */}
-        {!isTouch && <MonitorScreen />}
+        <MonitorScreen />
       </Movable>
 
       <MacBook />
@@ -145,17 +147,13 @@ function RoomContents() {
 const DOF_TARGET: [number, number, number] = [0.2, 1.0, -1.2]
 
 function Effects() {
-  const { isMobile, isTouch, view, layout } = useRoom()
+  const { isMobile, view, layout } = useRoom()
   const focus = monitorPanelWorld(layout.monitor).position
 
-  /* Phones pay for the room's identity, not for its polish: a vignette and
-     a whisper of bloom keep the palette, and the passes that cost a full
-     depth prepass — ambient occlusion, depth of field, the outline — are
-     the ones a mobile GPU cannot afford at 60fps. */
-  if (isMobile || isTouch) {
+  if (isMobile) {
     return (
-      <EffectComposer multisampling={0}>
-        <Bloom luminanceThreshold={1.15} luminanceSmoothing={0.25} intensity={0.26} mipmapBlur />
+      <EffectComposer>
+        <Bloom luminanceThreshold={1.1} luminanceSmoothing={0.25} intensity={0.3} mipmapBlur />
         <Vignette offset={0.32} darkness={0.5} blendFunction={BlendFunction.NORMAL} />
       </EffectComposer>
     )
@@ -185,18 +183,13 @@ function Effects() {
 }
 
 export function RoomScene() {
-  /* Pointer events are switched off in CSS on `.room-layer` once the hero is
-     behind us, which is also what stops R3F raycasting the scene per move. */
-  const { isMobile, isTouch, select } = useRoom()
-  const lightweight = isMobile || isTouch
+  const { isMobile, select } = useRoom()
 
   return (
     <div className="room-canvas">
       <Canvas
-        /* 'soft' maps to PCFSoftShadowMap, which three deprecated in r185
-           and now warns about on every boot. PCF is the supported filter. */
-        shadows={lightweight ? false : 'percentage'}
-        dpr={lightweight ? [1, 1.5] : [1, 2]}
+        shadows={isMobile ? false : 'soft'}
+        dpr={isMobile ? [1, 1.5] : [1, 2]}
         camera={{
           position: CAMERA.room.position.toArray(),
           fov: CAMERA.room.fov,

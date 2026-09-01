@@ -1,4 +1,4 @@
-import { featuredProjectIds, projects } from './projects'
+import { projects } from './projects'
 
 export type ObjectId =
   | 'monitor'
@@ -15,9 +15,9 @@ export type ObjectId =
   | 'chair'
   | 'speaker'
   | 'window'
-  | 'swisswatchpremium'
-  | 'algoritmedu'
-  | 'spring'
+  | 'swisswatch'
+  | 'hadiya'
+  | 'ctf'
 
 export interface InteractiveObject {
   id: ObjectId
@@ -177,21 +177,17 @@ const base: InteractiveObject[] = [
   },
 ]
 
-/* Only the three on the wall become room objects; the other four live in
-   the page's project index and would have nothing to be clicked on. */
-const projectObjects: InteractiveObject[] = projects
-  .filter((p) => (featuredProjectIds as readonly string[]).includes(p.id))
-  .map((p) => ({
-    id: p.id as ObjectId,
-    label: `${p.title.toUpperCase()} PROJECT`,
-    title: p.title,
-    category: p.category,
-    description: p.description,
-    bullets: p.features,
-    technologies: p.technologies,
-    projectId: p.id,
-    accent: p.accent,
-  }))
+const projectObjects: InteractiveObject[] = projects.map((p) => ({
+  id: p.id as ObjectId,
+  label: `${p.title.toUpperCase()} PROJECT`,
+  title: p.title,
+  category: p.category,
+  description: p.description,
+  bullets: p.features,
+  technologies: p.technologies,
+  projectId: p.id,
+  accent: p.accent,
+}))
 
 export const interactiveObjects: Record<ObjectId, InteractiveObject> = Object.fromEntries(
   [...base, ...projectObjects].map((o) => [o.id, o]),

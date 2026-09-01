@@ -8,7 +8,7 @@ import { useRoom } from '@/state/RoomContext'
  * a component written per object.
  */
 export function InfoPanel() {
-  const { selected, select, showProject } = useRoom()
+  const { selected, select } = useRoom()
   const [mounted, setMounted] = useState(false)
 
   /* Keep the node around for one frame so the exit transition can run. */
@@ -77,46 +77,99 @@ export function InfoPanel() {
 
       {project && (
         <div className="panel-actions">
-          {project.url && (
-            <a
-              className="panel-btn panel-btn-primary"
-              href={project.url}
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              Live demo
-            </a>
-          )}
-          <button
-            type="button"
-            className="panel-btn"
-            onClick={() => {
-              select(null)
-              showProject(project.id)
-            }}
-          >
-            Case study
-          </button>
-          {project.domain && <span className="panel-year">{project.domain}</span>}
+          <ExternalLink className="panel-btn panel-btn-primary" href={project.url}>
+            Live demo
+          </ExternalLink>
+          <ExternalLink className="panel-btn" href={project.github}>
+            GitHub
+          </ExternalLink>
+          <span className="panel-year">{project.year}</span>
         </div>
       )}
     </aside>
   )
 }
 
-/* ─── PROJECT PREVIEW ─────────────────────────────────────────── */
-function ProjectVisual({ id, accent }: { id: string; accent: string }) {
-  const project = getProject(id)
-  if (!project) return null
+/**
+ * Links stay in place but read as unavailable until a URL is filled in,
+ * rather than silently going nowhere.
+ */
+function ExternalLink({
+  href,
+  className,
+  children,
+}: {
+  href?: string
+  className: string
+  children: string
+}) {
+  if (!href) {
+    return (
+      <span className={className} aria-disabled="true" title="Not public yet">
+        {children}
+      </span>
+    )
+  }
 
   return (
+    <a className={className} href={href} target="_blank" rel="noreferrer noopener">
+      {children}
+    </a>
+  )
+}
+
+/* ─── ABSTRACT PROJECT PREVIEW ────────────────────────────────── */
+function ProjectVisual({ id, accent }: { id: string; accent: string }) {
+  return (
     <div className="panel-visual" style={{ ['--accent' as string]: accent }}>
-      <img
-        src={project.image}
-        alt={`${project.title} — ${project.subtitle}`}
-        loading="lazy"
-        decoding="async"
-      />
+      <svg viewBox="0 0 320 120" preserveAspectRatio="xMidYMid slice" aria-hidden>
+        <defs>
+          <linearGradient id={`grad-${id}`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={accent} stopOpacity="0.42" />
+            <stop offset="100%" stopColor={accent} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <rect width="320" height="120" fill={`url(#grad-${id})`} />
+
+        {id === 'swisswatch' && (
+          <g stroke={accent} fill="none" strokeWidth="1.4" opacity="0.85">
+            <circle cx="235" cy="60" r="40" />
+            <circle cx="235" cy="60" r="32" opacity="0.4" />
+            <path d="M235 60V34M235 60l19 11" strokeWidth="2" />
+          </g>
+        )}
+
+        {id === 'hadiya' && (
+          <g stroke={accent} fill="none" strokeWidth="1.4" opacity="0.8">
+            <circle cx="235" cy="60" r="20" />
+            <circle cx="235" cy="60" r="34" opacity="0.5" />
+            <circle cx="235" cy="60" r="48" opacity="0.25" />
+          </g>
+        )}
+
+        {id === 'ctf' && (
+          <g stroke={accent} strokeWidth="1.2" opacity="0.75">
+            {Array.from({ length: 16 }).map((_, i) => {
+              const a = (i / 16) * Math.PI * 2
+              return (
+                <line
+                  key={i}
+                  x1={235 + Math.cos(a) * 12}
+                  y1={60 + Math.sin(a) * 12}
+                  x2={235 + Math.cos(a) * (34 + (i % 3) * 12)}
+                  y2={60 + Math.sin(a) * (34 + (i % 3) * 12)}
+                />
+              )
+            })}
+          </g>
+        )}
+
+        <g fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="1">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <line key={i} x1={i * 40} y1="0" x2={i * 40} y2="120" />
+          ))}
+        </g>
+      </svg>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useVirtualFileSystem } from '@/hooks/useVirtualFileSystem'
 import { useRoom } from '@/state/RoomContext'
+import type { ObjectId } from '@/data/interactiveObjects'
 import { FileExplorer } from './FileExplorer'
 import { CodeEditor } from './CodeEditor'
 import { Terminal } from './Terminal'
@@ -11,21 +12,11 @@ import { Terminal } from './Terminal'
  */
 export function VirtualComputer() {
   const vfs = useVirtualFileSystem()
-  const { showProject, exitComputer } = useRoom()
+  const { select, exitComputer } = useRoom()
   const [terminalOpen, setTerminalOpen] = useState(true)
   const [explorerOpen, setExplorerOpen] = useState(true)
 
-  /**
-   * Opening a project from the machine hands off to the page's case study
-   * rather than the room's info panel: only three of the seven exist as
-   * objects in the room, so the panel would silently do nothing for the
-   * other four. Step back from the desk first, so the sheet is not stacked
-   * on top of a screen the visitor is still sitting at.
-   */
-  const openProject = (id: string) => {
-    exitComputer()
-    showProject(id)
-  }
+  const openProject = (id: string) => select(id as ObjectId)
 
   return (
     <div className="vm">
@@ -36,23 +27,18 @@ export function VirtualComputer() {
             type="button"
             className="vm-dot vm-dot-red"
             title="Leave the machine"
-            aria-label="Leave the machine"
             onClick={exitComputer}
           />
           <button
             type="button"
             className="vm-dot vm-dot-amber"
             title="Toggle terminal"
-            aria-label="Toggle terminal"
-            aria-pressed={terminalOpen}
             onClick={() => setTerminalOpen((v) => !v)}
           />
           <button
             type="button"
             className="vm-dot vm-dot-green"
             title="Toggle explorer"
-            aria-label="Toggle explorer"
-            aria-pressed={explorerOpen}
             onClick={() => setExplorerOpen((v) => !v)}
           />
         </div>
@@ -71,24 +57,20 @@ export function VirtualComputer() {
             type="button"
             className={`vm-activity-btn${explorerOpen ? ' is-active' : ''}`}
             title="Explorer"
-            aria-label="Explorer"
-            aria-pressed={explorerOpen}
             onClick={() => setExplorerOpen((v) => !v)}
           >
             <Icon name="files" />
           </button>
-          <button type="button" className="vm-activity-btn" title="Search" aria-label="Search">
+          <button type="button" className="vm-activity-btn" title="Search">
             <Icon name="search" />
           </button>
-          <button type="button" className="vm-activity-btn" title="Source control" aria-label="Source control">
+          <button type="button" className="vm-activity-btn" title="Source control">
             <Icon name="git" />
           </button>
           <button
             type="button"
             className={`vm-activity-btn${terminalOpen ? ' is-active' : ''}`}
             title="Terminal"
-            aria-label="Terminal"
-            aria-pressed={terminalOpen}
             onClick={() => setTerminalOpen((v) => !v)}
           >
             <Icon name="terminal" />
