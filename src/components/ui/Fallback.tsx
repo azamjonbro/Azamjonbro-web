@@ -3,6 +3,7 @@ import { projects } from '@/data/projects'
 import { skillGroups } from '@/data/skills'
 import { missions, statusLabel } from '@/data/experience'
 import { processSteps } from '@/data/process'
+import { articles } from '@/data/lab'
 
 /**
  * The whole portfolio as a document.
@@ -118,9 +119,26 @@ export function Fallback({ visible }: { visible: boolean }) {
 
       <section aria-labelledby="doc-lab">
         <h2 id="doc-lab">{lab.title}</h2>
-        <p>
-          {lab.status}. {lab.body}
-        </p>
+        <p>{lab.body}</p>
+
+        {articles.length === 0 ? (
+          <p>{lab.status}</p>
+        ) : (
+          articles.map((article) => (
+            <article key={article.meta.slug} className="doc-note" id={`note-${article.meta.slug}`}>
+              <h3>{article.meta.title}</h3>
+              <p className="doc-meta">
+                {[article.meta.project, `${article.meta.minutes} min read`,
+                  article.meta.status === 'draft' ? 'Draft' : null]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+              {/* Built from local .md files at build time — authored content,
+                  never anything a visitor supplied. */}
+              <div className="prose" dangerouslySetInnerHTML={{ __html: article.html }} />
+            </article>
+          ))
+        )}
       </section>
 
       <section aria-labelledby="doc-contact">

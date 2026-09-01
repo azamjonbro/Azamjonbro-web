@@ -215,7 +215,7 @@ export function LabModule() {
   const active = nearZone === 'lab'
   const zone = getZone('lab')
   const caption = useProceduralTexture(
-    () => createCaption([lab.title, lab.status], '#8f9bb8', [44, 22]),
+    () => createCaption([lab.title, lab.caption], '#8f9bb8', [44, 22]),
     [],
   )
 

@@ -47,7 +47,10 @@ export const contact = {
 } as const
 
 export const lab = {
-  title: 'BLOG / LAB',
+  title: 'LAB',
+  /* Rendered on the module in the world. */
+  caption: 'FIELD NOTES',
+  /* Shown only when no articles are filed. */
   status: 'COMING SOON',
-  body: 'A place for write-ups on the systems behind these projects — architecture decisions, deployment notes, and what broke in production.',
+  body: 'Write-ups on the systems behind these projects — the decisions, the constraints, and the parts that only show up in production.',
 } as const

@@ -45,7 +45,7 @@ const order: Array<Omit<Zone, 'position' | 'rotation'>> = [
   { id: 'skills', label: 'SKILLS', caption: 'SYSTEMS', radius: 7, accent: '#ffd36e' },
   { id: 'experience', label: 'EXPERIENCE', caption: 'MISSION LOG', radius: 7, accent: '#ff9bd2' },
   { id: 'process', label: 'PROCESS', caption: 'IDEA → PRODUCTION', radius: 7, accent: '#c4a4ff' },
-  { id: 'lab', label: 'LAB', caption: 'BLOG', radius: 6, accent: '#8f9bb8' },
+  { id: 'lab', label: 'LAB', caption: 'FIELD NOTES', radius: 6, accent: '#8f9bb8' },
   { id: 'contact', label: 'CONTACT', caption: 'UPLINK', radius: 8, accent: '#ffffff' },
 ]
 

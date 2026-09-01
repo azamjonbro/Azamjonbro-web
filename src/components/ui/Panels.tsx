@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { about, contact, lab } from '@/data/site'
+import { about, contact } from '@/data/site'
 import { projects } from '@/data/projects'
 import { skillGroups } from '@/data/skills'
 import { missions, statusLabel } from '@/data/experience'
@@ -7,6 +7,7 @@ import { processSteps } from '@/data/process'
 import { getZone, type ZoneId } from '@/data/zones'
 import { useWorld } from '@/state/WorldContext'
 import { Panel } from './Panel'
+import { LabPanel } from './lab/LabPanel'
 
 /** Routes the open zone to its content. */
 export function ZonePanel() {
@@ -196,12 +197,7 @@ function ProcessBody() {
 /* ─── LAB ─────────────────────────────────────────────────────── */
 
 function LabBody() {
-  return (
-    <div className="lab">
-      <p className="lab-status">{lab.status}</p>
-      <p className="lab-body">{lab.body}</p>
-    </div>
-  )
+  return <LabPanel />
 }
 
 /* ─── CONTACT ─────────────────────────────────────────────────── */
