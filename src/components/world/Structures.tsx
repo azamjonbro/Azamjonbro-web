@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { allSkills, skillGroups } from '@/data/skills'
+import { allSkills } from '@/data/skills'
 import { missions } from '@/data/experience'
 import { processSteps } from '@/data/process'
 import { lab } from '@/data/site'
