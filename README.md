@@ -127,10 +127,30 @@ Vercel, configured in `vercel.json`:
 - build `npm run build` → output `dist`
 - SPA rewrites, so any path serves the app
 - immutable caching for hashed assets and fonts
-- a permanent redirect from `www.azamjonbro.uz` to the apex, so the canonical
-  URL stays single
+- `Access-Control-Allow-Origin: *` on `/assets`, `/fonts` and `/projects`
 
 No environment variables are required.
+
+### Choosing between `azamjonbro.uz` and `www`
+
+**Do this in Vercel's dashboard — Settings → Domains — not in `vercel.json`.**
+
+Add both domains and mark the apex as primary; Vercel then issues the
+`www` → apex redirect at the domain layer.
+
+This is not a stylistic preference. A host redirect written as a `redirects`
+rule in `vercel.json` is applied per request, including to `/assets/*.js`,
+`/assets/*.css` and `/fonts/*.woff2`. Scripts, stylesheets and fonts are all
+fetched in CORS mode, so redirecting one of them to a different host requires
+an `Access-Control-Allow-Origin` header on the response it lands on — and
+without it the browser blocks the load. The result is a page that serves its
+HTML and nothing else: no styles, no bundle, no fonts.
+
+A domain-level redirect happens on the document request, before a single
+subresource has been asked for, so the whole page is already on one origin by
+the time it starts loading anything. The `Access-Control-Allow-Origin` headers
+above are a second line of defence, so a host mismatch can never blank the
+site again.
 
 ## Known issues
 
