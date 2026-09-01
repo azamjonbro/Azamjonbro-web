@@ -21,7 +21,7 @@ const TURN_RATE = 9
  * it every frame, and a state update per frame would re-render the tree
  * sixty times a second.
  */
-export const playerPosition = /* @__PURE__ */ new THREE.Vector3().copy(SPAWN)
+export const playerPosition = /* @__PURE__ */ new THREE.Vector3(...SPAWN)
 export const playerFacing = { angle: 0 }
 
 export function Player({ cameraYaw }: { cameraYaw: React.RefObject<number> }) {
@@ -36,6 +36,12 @@ export function Player({ cameraYaw }: { cameraYaw: React.RefObject<number> }) {
   const thruster = useRef<THREE.Mesh>(null)
 
   const velocity = useMemo(() => new THREE.Vector3(), [])
+  /* Zone centres as vectors, built once — the data module keeps them as
+     plain tuples so it can stay out of the three.js bundle. */
+  const zoneCentres = useMemo(
+    () => zones.map((zone) => ({ id: zone.id, centre: new THREE.Vector3(...zone.position), radius: zone.radius })),
+    [],
+  )
   const desired = useMemo(() => new THREE.Vector3(), [])
   const stride = useRef(0)
   /* Proximity is compared against the last reported value so the context is
@@ -121,8 +127,8 @@ export function Player({ cameraYaw }: { cameraYaw: React.RefObject<number> }) {
 
     /* ── PROXIMITY ────────────────────────────────────────────── */
     let zoneHit: string | null = null
-    for (const zone of zones) {
-      if (p.distanceTo(zone.position) < zone.radius) {
+    for (const zone of zoneCentres) {
+      if (p.distanceTo(zone.centre) < zone.radius) {
         zoneHit = zone.id
         break
       }
@@ -152,7 +158,7 @@ export function Player({ cameraYaw }: { cameraYaw: React.RefObject<number> }) {
   })
 
   return (
-    <group ref={group} position={SPAWN.toArray()}>
+    <group ref={group} position={SPAWN}>
       <Avatar
         body={body}
         legL={legL}

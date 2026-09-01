@@ -19,7 +19,7 @@ export const PROJECT_BAY = {
   slotRadius: 4.4,
 } as const
 
-const centre = /* @__PURE__ */ getZone('projects').position.clone()
+const centre = /* @__PURE__ */ new THREE.Vector3(...getZone('projects').position)
 
 /** Direction from the hub out to the bay — the arc opens back toward it. */
 const facing = /* @__PURE__ */ Math.atan2(centre.z, centre.x)

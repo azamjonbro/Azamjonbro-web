@@ -1,11 +1,17 @@
-# azamjonbro.uz
+# AZAMJON SPACE
 
-One room. No scrolling.
+`azamjonbro.uz` — a developer portfolio you walk through.
 
-The entire portfolio is a single interactive 3D developer workspace. There are no
-sections that replace each other, no camera journey, no scroll progress — the room
-*is* the site. Move the mouse to look around, hover anything to name it, click to
-inspect it, and click the monitor to sit down and use the machine.
+The visitor boots into a space station, spawns on the deck, and explores.
+Seven destinations sit on a ring around a central hub: About, Projects,
+Skills, Experience, Process, Lab and Contact. Walking into one lights it and
+offers to open it; opening it flies the camera in and raises a holographic
+panel. The projects bay holds seven exhibits, each a hologram carrying its
+own screenshot.
+
+The content is the point. The station is how it is presented — and every
+word of it is also a plain HTML document, so a browser without WebGL, a
+search crawler and a screen reader all get the whole portfolio.
 
 ## Running it
 
@@ -13,73 +19,123 @@ inspect it, and click the monitor to sit down and use the machine.
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # typecheck + production bundle
+npm run preview  # serve the production build
 npm run lint
 ```
+
+## Controls
+
+|             | Desktop                | Touch              |
+| ----------- | ---------------------- | ------------------ |
+| Move        | `W` `A` `S` `D` / arrows | floating joystick, left half |
+| Look        | drag                   | swipe              |
+| Interact    | `E` / `Space` / `Enter` | tap the prompt    |
+| Close       | `Esc`                  | tap ✕              |
+
+The compass along the bottom jumps to any destination without walking there.
+
+`?nofx` disables post-processing, which is useful when profiling.
 
 ## How it fits together
 
 ```
 src/
+├── data/                    all content, no presentation
+│   ├── projects.ts          the seven exhibits
+│   ├── skills.ts            five groups; `context` says what each is used for
+│   ├── experience.ts        the mission log
+│   ├── process.ts           the six stages
+│   ├── site.ts              identity, about, contact, lab
+│   └── zones.ts             where every destination is — three.js-free on purpose
+├── lib/
+│   ├── input.ts             keyboard, joystick and drag, collapsed into one struct
+│   ├── perf.ts              device tier: dpr, shadows, effects, particle counts
+│   ├── bay.ts               layout of the projects arc
+│   ├── spaceTextures.ts     every texture and every in-world label, drawn on canvas
+│   ├── uiSounds.ts          interaction sounds
+│   └── ambientAudio.ts      the ambience behind the SOUND toggle
+├── state/WorldContext.tsx   stage, proximity, open panels, quality, capabilities
 ├── components/
-│   ├── room/            everything inside the <Canvas>
-│   │   ├── RoomScene    canvas, post-processing, scene assembly
-│   │   ├── CameraRig    damped mouse-look, orbit-style
-│   │   ├── Shell        floor, walls, window, curtains, shelf
-│   │   ├── Desk         marble top, steel frame, cable run
-│   │   ├── Props        every interactive object on the desk
-│   │   ├── WallDisplays the three project panels
-│   │   ├── MonitorScreen the machine, rendered as real DOM in 3D
-│   │   └── Hotspot      the shared interaction contract
-│   └── ui/              overlays outside the canvas
-│       ├── InfoPanel    one panel renders every object
-│       ├── Tooltip, Hint, LoadingScreen, RoomHud, ResumeViewer
-│       └── computer/    FileExplorer · CodeEditor · Terminal
-├── data/
-│   ├── interactiveObjects.ts   what every object says when clicked
-│   ├── projects.ts             SwissWatch · Hadiya · CTF Platform
-│   └── fileSystem.ts           the virtual filesystem the IDE browses
-├── hooks/               useObjectInteraction · useCameraInteraction · useVirtualFileSystem
-├── lib/                 layout (single source of geometry truth) · textures · pointer
-└── state/RoomContext    hover, selection, view mode, discovery
+│   ├── world/               everything inside the <Canvas>
+│   │   ├── SpaceScene       canvas, tiered post-processing, scene assembly
+│   │   ├── CameraRig        follow, cinematic focus, and the arrival move
+│   │   ├── Player           the avatar, movement, and all proximity tests
+│   │   ├── Station          deck, hub, spokes, rim
+│   │   ├── Cosmos           starfield, planet with a rim-lit atmosphere, haze
+│   │   ├── ProjectBay       the seven exhibits
+│   │   ├── ZoneMarker       a destination pad and its sign
+│   │   ├── Structures       the object standing on each pad
+│   │   └── Dust             particulate, for scale
+│   └── ui/                  the 2D layer
+│       ├── Boot             the loading sequence and ENTER THE WORLD
+│       ├── Hud              wordmark, prompt, controls hint, compass
+│       ├── Panel            the shell every destination opens inside
+│       ├── Panels           the content of each destination
+│       ├── ProjectPanel     one exhibit, opened
+│       ├── Joystick         mobile movement
+│       ├── Cursor           the desktop dot
+│       └── Fallback         the whole portfolio as a document
+└── hooks/
+    ├── useControls.ts       binds input and routes the interact key
+    └── useTexture.ts        procedural textures that dispose themselves
 ```
 
-### Interaction
+### Content lives in `src/data`
 
-```
-3D object → onPointerOver → hover state → tooltip
-                          → onClick → selected → <InfoPanel />
-```
+Nothing is hard-coded in a component. Adding a project is one entry in
+`projects.ts` — the exhibit, the bay list, the panel and the written document
+all read from it. The same is true of skills, experience, process and the
+destinations themselves.
 
-Every prop goes through `<Hotspot id="…">`, which supplies the pointer cursor, the
-tooltip, the hover outline (drawn by the post-processing `Outline` pass) and the
-click. Panel content comes from `data/interactiveObjects.ts` — there is no
-component written per object.
+### Screenshots
 
-### The machine
+`public/projects/*.webp` are generated placeholder plates. Overwrite a file to
+replace it; no code change. See `public/projects/README.md`.
 
-The monitor is not a texture. `MonitorScreen` renders a real DOM tree through
-drei's `<Html transform>`, mapped onto the physical panel, so the editor, file
-explorer and terminal are genuinely interactive. Clicking the screen moves the
-camera to a seated position and enables pointer events; `Esc` steps back.
+## Things worth knowing before editing
 
-The filesystem in `data/fileSystem.ts` is simulated. The terminal accepts
-`help`, `whoami`, `projects`, `stack`, `open <id>`, `contact`, `ls` and `clear`
-and never executes anything.
+- **`data/zones.ts` deliberately does not import three.js.** It is read by the
+  HUD and the panels, which are in the eagerly loaded bundle. Importing a
+  vector class there pulls the entire renderer in with it — it did, once, and
+  cost 100 KB gzip on a device that may never start WebGL. Positions are plain
+  tuples; the world converts them.
+- **The station is lazily imported and the rest is not.** The boot screen, the
+  copy and the written document are interactive before three.js is fetched,
+  and a device with no WebGL context never downloads it at all.
+- **Every texture and every in-world label is drawn on a canvas at runtime.**
+  No image assets beyond the screenshots, no font parsing, no CDN. Labels are
+  drawn after `document.fonts.ready` — see the note in `src/main.tsx`, because
+  a canvas bakes in whatever face was available at the moment it drew.
+- **Movement never touches React state.** `lib/input` is written by every
+  control surface and read once per frame; the player's position is a module
+  vector the camera and the proximity tests share. React only hears about
+  things a person would notice changing.
+- **Quality is decided once in `lib/perf`.** Shadows, ambient occlusion, the
+  particle counts and the device pixel ratio all read the tier, rather than
+  ten components each checking `isMobile` and drifting apart.
+- **Signs are single-sided.** Text on a double-sided plane renders mirrored
+  from behind. The facing maths is in `onRing` in `data/zones.ts`.
+- **Audio never autoplays.** The context is not even constructed until the
+  SOUND button is pressed.
+- **`prefers-reduced-motion` is honoured throughout** — the arrival move, the
+  gyros, the dust, the pulses and the avatar's gait all check it.
 
-### Things worth knowing before editing
+## Deployment
 
-- **`lib/layout.ts` is the single source of geometry truth.** The camera, the
-  monitor and the wall displays all read from it, so they cannot drift apart.
-- **Textures are procedural.** Marble, the night skyline, the rug, the keycaps and
-  the project panels are all generated on a canvas at runtime — no image assets and
-  no CDN. The environment map is built in-scene from `<Lightformer>`s for the same
-  reason.
-- **`CameraRig` orbits the anchor point rather than turning in place.** A head turn
-  makes objects slide out from under the cursor as you reach for them; an orbit
-  keeps them still. It also replays the last pointer event while the camera settles,
-  so hover never goes stale and a click never misses what the tooltip named.
-- **`onPointerMissed` checks the event target.** R3F attaches its listeners to the
-  canvas' parent, so clicks inside the monitor's DOM arrive there too; without the
-  check, using the IDE would close whatever panel was open.
-- **Small props carry an invisible `<HitBox>`.** Raycasting ignores `visible`, so a
-  mouse or a clock gets a hit area a person can actually land on.
+Vercel, configured in `vercel.json`:
+
+- build `npm run build` → output `dist`
+- SPA rewrites, so any path serves the app
+- immutable caching for hashed assets and fonts
+- a permanent redirect from `www.azamjonbro.uz` to the apex, so the canonical
+  URL stays single
+
+No environment variables are required.
+
+## Known issues
+
+- `@react-three/fiber` constructs `THREE.Clock`, which three r185 deprecated,
+  so the console carries a deprecation warning at startup. It comes from the
+  library, not from this code, and cannot be fixed here without patching a
+  dependency. It is a warning, not an error, and nothing is recreated at
+  runtime.

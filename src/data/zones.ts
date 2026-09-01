@@ -1,14 +1,15 @@
-import * as THREE from 'three'
-
 /**
  * The destinations on the station, and the single source of truth for where
  * everything is.
  *
- * The world places its architecture from this list, the player collides
- * against it, the HUD names it, and the accessible fallback renders the same
- * order as a document. Adding a destination is one entry here.
+ * Deliberately free of three.js. This module is read by the HUD and the
+ * panels, which are in the eagerly loaded bundle — importing a vector class
+ * here would drag the entire renderer in with it, and a visitor whose device
+ * cannot start WebGL would download it for nothing.
  */
 export type ZoneId = 'about' | 'projects' | 'skills' | 'experience' | 'process' | 'lab' | 'contact'
+
+export type Vec3 = readonly [number, number, number]
 
 export interface Zone {
   id: ZoneId
@@ -17,8 +18,8 @@ export interface Zone {
   /** Small technical caption under the label. */
   caption: string
   /** Centre of the pad, on the station floor. */
-  position: THREE.Vector3
-  /** Facing, in radians, so the display turns toward the station centre. */
+  position: Vec3
+  /** Facing, in radians, so the display turns back toward the hub. */
   rotation: number
   /** Radius within which the interact prompt appears. */
   radius: number
@@ -31,7 +32,7 @@ const RING = 26
 function onRing(index: number, total: number, radius = RING) {
   const angle = (index / total) * Math.PI * 2 - Math.PI / 2
   return {
-    position: new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius),
+    position: [Math.cos(angle) * radius, 0, Math.sin(angle) * radius] as Vec3,
     /* Turns the face back toward the hub: a plane's normal after a yaw of θ
        is (sin θ, 0, cos θ), and we want it to equal −(cos a, 0, sin a). */
     rotation: -angle - Math.PI / 2,
@@ -55,7 +56,7 @@ export function getZone(id: ZoneId) {
 }
 
 /** Where the player is standing when the world opens. */
-export const SPAWN = new THREE.Vector3(0, 0, 8)
+export const SPAWN: Vec3 = [0, 0, 8]
 
 /** The player cannot walk past this; the station ends here. */
 export const STATION_RADIUS = RING + 14

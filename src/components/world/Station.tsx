@@ -153,8 +153,8 @@ function Spokes() {
   return (
     <group>
       {zones.map((zone) => {
-        const angle = Math.atan2(zone.position.z, zone.position.x)
-        const length = Math.hypot(zone.position.x, zone.position.z)
+        const angle = Math.atan2(zone.position[2], zone.position[0])
+        const length = Math.hypot(zone.position[0], zone.position[2])
         return (
           <group key={zone.id} rotation={[0, -angle, 0]}>
             <mesh position={[length / 2, 0.03, 0]} rotation={[-Math.PI / 2, 0, 0]}>

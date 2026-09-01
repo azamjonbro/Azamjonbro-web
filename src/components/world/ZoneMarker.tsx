@@ -46,7 +46,7 @@ export function ZoneMarker({ zone, children }: { zone: Zone; children?: React.Re
       glow.current.intensity += (wanted - glow.current.intensity) * dt * 5
     }
     if (signGroup.current && !reducedMotion) {
-      signGroup.current.position.y = 4.3 + Math.sin(t * 0.9 + zone.position.x) * 0.12
+      signGroup.current.position.y = 4.3 + Math.sin(t * 0.9 + zone.position[0]) * 0.12
     }
     if (pulse.current) {
       const material = pulse.current.material as THREE.MeshBasicMaterial
@@ -55,7 +55,7 @@ export function ZoneMarker({ zone, children }: { zone: Zone; children?: React.Re
         pulse.current.scale.setScalar(1)
       } else {
         /* One expanding ripple, restarting every four seconds. */
-        const phase = (t * 0.25 + zone.position.z * 0.03) % 1
+        const phase = (t * 0.25 + zone.position[2] * 0.03) % 1
         pulse.current.scale.setScalar(0.35 + phase * 1.1)
         material.opacity = (1 - phase) * (active ? 0.45 : 0.18)
       }
@@ -63,7 +63,7 @@ export function ZoneMarker({ zone, children }: { zone: Zone; children?: React.Re
   })
 
   return (
-    <group position={zone.position.toArray()} rotation={[0, zone.rotation, 0]}>
+    <group position={zone.position} rotation={[0, zone.rotation, 0]}>
       {/* Pad */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]} receiveShadow>
         <circleGeometry args={[zone.radius * 0.62, 48]} />

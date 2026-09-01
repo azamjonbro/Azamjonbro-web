@@ -79,7 +79,7 @@ export function SkillConstellation() {
   const zone = getZone('skills')
 
   return (
-    <group position={[zone.position.x, 5.4, zone.position.z]}>
+    <group position={[zone.position[0], 5.4, zone.position[2]]}>
       <group ref={group}>
         <lineSegments geometry={links}>
           <lineBasicMaterial
@@ -121,7 +121,7 @@ export function MissionPillars() {
   const statusColor = { completed: '#7dffb0', current: '#ffd36e', ongoing: '#ff9bd2' } as const
 
   return (
-    <group position={zone.position.toArray()} rotation={[0, zone.rotation, 0]}>
+    <group position={zone.position} rotation={[0, zone.rotation, 0]}>
       {missions.map((mission, i) => {
         const x = (i - (missions.length - 1) / 2) * 2.6
         const height = 2.4 + i * 0.75
@@ -185,7 +185,7 @@ export function ProcessRing() {
   })
 
   return (
-    <group ref={group} position={zone.position.toArray()}>
+    <group ref={group} position={zone.position}>
       {processSteps.map((step, i) => {
         const angle = (i / processSteps.length) * Math.PI * 2
         const r = 3.6
@@ -220,7 +220,7 @@ export function LabModule() {
   )
 
   return (
-    <group position={zone.position.toArray()} rotation={[0, zone.rotation, 0]}>
+    <group position={zone.position} rotation={[0, zone.rotation, 0]}>
       <mesh position={[0, 1.5, 0]} castShadow>
         <boxGeometry args={[3.4, 3, 2.2]} />
         <meshStandardMaterial color="#171c25" roughness={0.55} metalness={0.8} />
@@ -278,7 +278,7 @@ export function ContactUplink() {
   })
 
   return (
-    <group position={zone.position.toArray()} rotation={[0, zone.rotation, 0]}>
+    <group position={zone.position} rotation={[0, zone.rotation, 0]}>
       {/* Mast */}
       <mesh position={[0, 2.2, 0]} castShadow>
         <cylinderGeometry args={[0.22, 0.42, 4.4, 12]} />
@@ -344,7 +344,7 @@ export function AboutCore() {
   })
 
   return (
-    <group position={zone.position.toArray()}>
+    <group position={zone.position}>
       <mesh ref={core} position={[0, 3.4, 0]}>
         <icosahedronGeometry args={[0.9, 1]} />
         <meshStandardMaterial

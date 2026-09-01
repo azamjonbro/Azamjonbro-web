@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { getZone } from '@/data/zones'
+import { zones } from '@/data/zones'
 import { projectSlotPosition } from '@/lib/bay'
 import { projects } from '@/data/projects'
 import { clamp, damp, input } from '@/lib/input'
@@ -31,6 +31,12 @@ export function CameraRig({ yawOut }: { yawOut: React.RefObject<number> }) {
   const aim = useMemo(() => new THREE.Vector3(), [])
   const offset = useMemo(() => new THREE.Vector3(), [])
   const smoothedTarget = useMemo(() => new THREE.Vector3().copy(playerPosition), [])
+  /* Zone centres, converted once. See the note in data/zones. */
+  const zoneCentre = useMemo(() => {
+    const map = new Map<string, THREE.Vector3>()
+    for (const zone of zones) map.set(zone.id, new THREE.Vector3(...zone.position))
+    return map
+  }, [])
 
   const arrival = useRef(0)
   const yaw = useRef(0)
@@ -68,7 +74,7 @@ export function CameraRig({ yawOut }: { yawOut: React.RefObject<number> }) {
         height = 3.6
       }
     } else if (openZone) {
-      focus = getZone(openZone).position
+      focus = zoneCentre.get(openZone) ?? null
       distance = openZone === 'projects' ? 20 : 11
       height = openZone === 'projects' ? 9 : 5
     }
