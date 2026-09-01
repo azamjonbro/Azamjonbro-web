@@ -12,7 +12,7 @@ import { projects } from '@/data/projects'
  */
 export const PROJECT_BAY = {
   /** Radius of the arc the exhibits stand on. */
-  radius: 13,
+  radius: 10,
   /** How much of a circle the arc covers. */
   spread: Math.PI * 1.02,
   /** How close the player must be for an exhibit to activate. */

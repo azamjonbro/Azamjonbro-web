@@ -241,7 +241,6 @@ export function LabModule() {
           transparent
           depthWrite={false}
           toneMapped={false}
-          side={THREE.DoubleSide}
           opacity={active ? 1 : 0.55}
         />
       </mesh>

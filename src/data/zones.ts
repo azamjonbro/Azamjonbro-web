@@ -32,8 +32,9 @@ function onRing(index: number, total: number, radius = RING) {
   const angle = (index / total) * Math.PI * 2 - Math.PI / 2
   return {
     position: new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius),
-    /* +PI so the display's face turns back toward the hub. */
-    rotation: -angle + Math.PI / 2,
+    /* Turns the face back toward the hub: a plane's normal after a yaw of θ
+       is (sin θ, 0, cos θ), and we want it to equal −(cos a, 0, sin a). */
+    rotation: -angle - Math.PI / 2,
   }
 }
 
@@ -57,4 +58,4 @@ export function getZone(id: ZoneId) {
 export const SPAWN = new THREE.Vector3(0, 0, 8)
 
 /** The player cannot walk past this; the station ends here. */
-export const STATION_RADIUS = RING + 9
+export const STATION_RADIUS = RING + 14

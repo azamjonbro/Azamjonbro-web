@@ -188,7 +188,7 @@
   transform: translateY(-6px);
 }
 
-.compass.is-hidden { transform: translateY(6px); }
+.compass.is-hidden { transform: translateX(-50%) translateY(6px); }
 
 @keyframes hud-in {
   from { opacity: 0; transform: translateY(-10px); }
@@ -373,7 +373,14 @@
   background: rgba(6, 9, 16, 0.6);
   backdrop-filter: blur(16px);
   pointer-events: auto;
-  animation: hud-in 1s var(--glide) 0.8s both;
+  /* Its own keyframes: `hud-in` finishes on `transform: none`, which would
+     discard the centring translate this element depends on. */
+  animation: compass-in 1s var(--glide) 0.8s both;
+}
+
+@keyframes compass-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%); }
 }
 
 .compass-item {

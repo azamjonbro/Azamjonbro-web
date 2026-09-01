@@ -86,13 +86,8 @@ export function ZoneMarker({ zone, children }: { zone: Zone; children?: React.Re
       <group ref={signGroup} position={[0, 4.3, 0]}>
         <mesh>
           <planeGeometry args={[6.4, 3.2]} />
-          <meshBasicMaterial
-            map={sign}
-            transparent
-            depthWrite={false}
-            toneMapped={false}
-            side={THREE.DoubleSide}
-          />
+          {/* Front face only: text seen from behind renders mirrored. */}
+          <meshBasicMaterial map={sign} transparent depthWrite={false} toneMapped={false} />
         </mesh>
 
         {/* The pane the sign is projected onto. */}

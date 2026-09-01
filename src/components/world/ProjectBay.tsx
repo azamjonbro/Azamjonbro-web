@@ -146,14 +146,8 @@ function Exhibit({ project, index }: { project: Project; index: number }) {
 
         <mesh position={[0, -1.42, 0.02]} userData={{ max: 1 }}>
           <planeGeometry args={[5.8, 2.9]} />
-          <meshBasicMaterial
-            map={plate}
-            transparent
-            opacity={0}
-            depthWrite={false}
-            toneMapped={false}
-            side={THREE.DoubleSide}
-          />
+          {/* Front face only — see ZoneMarker. */}
+          <meshBasicMaterial map={plate} transparent opacity={0} depthWrite={false} toneMapped={false} />
         </mesh>
       </group>
     </group>
@@ -173,14 +167,7 @@ function Screenshot({ src }: { src: string }) {
   return (
     <mesh position={[0, 0.72, 0.01]} userData={{ max: 0.92 }}>
       <planeGeometry args={[5.6, 3.5]} />
-      <meshBasicMaterial
-        map={texture}
-        transparent
-        opacity={0}
-        depthWrite={false}
-        toneMapped={false}
-        side={THREE.DoubleSide}
-      />
+      <meshBasicMaterial map={texture} transparent opacity={0} depthWrite={false} toneMapped={false} />
     </mesh>
   )
 }
