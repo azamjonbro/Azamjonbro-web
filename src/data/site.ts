@@ -1,18 +1,53 @@
+/** Identity and copy. No component hard-codes a word of this. */
+
 export const site = {
-  name: 'Azamjonbro',
+  name: 'AZAMJONBRO',
+  person: 'Azamjon',
+  role: 'Full-Stack Developer',
   domain: 'azamjonbro.uz',
-  title: 'Azamjonbro — Full-Stack Developer & AI Automation',
+  origin: 'https://azamjonbro.uz',
+  title: 'Azamjon — Full-Stack Developer',
   description:
-    'Azamjonbro is a full-stack developer building digital products, AI automations, and scalable web systems.',
-  tagline: 'I build digital systems that actually work.',
-  roles: ['Full-Stack', 'AI Automation', 'DevOps'] as const,
-  philosophy: [
-    "I don't just write code.",
-    'I build systems.',
-    'I automate repetitive work.',
-    'I turn ideas into products.',
-    'I deploy them.',
-    'I keep them running.',
+    'Azamjon is a full-stack developer building digital products, web applications, systems, APIs, automation and interactive experiences. Explore the work as a 3D space station.',
+} as const
+
+export const about = {
+  heading: 'AZAMJON',
+  role: 'Full-Stack Developer',
+  statement:
+    'I build digital products, web applications, systems and interactive experiences.',
+  body: 'I work across frontend, backend, databases, APIs, infrastructure, automation and AI integrations.',
+  closing: ["I don't just write code.", 'I build complete products.'],
+  disciplines: [
+    'Frontend',
+    'Backend',
+    'Databases',
+    'APIs',
+    'Infrastructure',
+    'Automation',
+    'AI Integration',
   ],
-  about: `Full-stack developer focused on building products that work in production — from frontend interfaces to backend systems, AI automations, and deployment pipelines.`,
+} as const
+
+export const contact = {
+  heading: 'Have an idea?',
+  sub: "Let's build it.",
+  body: 'Open for product work, client projects and long-running collaborations.',
+  /* Only links that already existed in this repository. Nothing invented. */
+  links: [
+    { id: 'telegram', label: 'TELEGRAM', value: '@azamjonbro', href: 'https://t.me/azamjonbro' },
+    {
+      id: 'github',
+      label: 'GITHUB',
+      value: 'github.com/azamjonbro',
+      href: 'https://github.com/azamjonbro',
+    },
+    { id: 'web', label: 'WEB', value: 'azamjonbro.uz', href: 'https://azamjonbro.uz' },
+  ],
+} as const
+
+export const lab = {
+  title: 'BLOG / LAB',
+  status: 'COMING SOON',
+  body: 'A place for write-ups on the systems behind these projects — architecture decisions, deployment notes, and what broke in production.',
 } as const
