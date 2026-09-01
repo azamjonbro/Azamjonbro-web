@@ -1,17 +1,34 @@
-# AZAMJON SPACE
+# azamjonbro.uz
 
-`azamjonbro.uz` — a developer portfolio you walk through.
+A developer portfolio with two front doors.
 
-The visitor boots into a space station, spawns on the deck, and explores.
-Seven destinations sit on a ring around a central hub: About, Projects,
-Skills, Experience, Process, Lab and Contact. Walking into one lights it and
-offers to open it; opening it flies the camera in and raises a holographic
-panel. The projects bay holds seven exhibits, each a hologram carrying its
-own screenshot.
+**On a desktop**, `/` opens AZAMJON SPACE — a station you walk through. You
+spawn on the deck and explore seven destinations on a ring around a central
+hub: About, Projects, Skills, Experience, Process, Lab and Contact. Walking
+into one lights it and offers to open it; opening it flies the camera in and
+raises a holographic panel. The projects bay holds seven exhibits, each a
+hologram carrying its own screenshot.
 
-The content is the point. The station is how it is presented — and every
-word of it is also a plain HTML document, so a browser without WebGL, a
-search crawler and a screen reader all get the whole portfolio.
+**On a phone**, `/` opens the portfolio as a page. That is not a fallback: a
+phone reaches the content faster by reading it than by walking a station on a
+five-inch screen, so on touch the page *is* the site and the world is an
+optional demo behind `/world`. The renderer is never downloaded unless
+somebody asks for it.
+
+The write-ups live at `/blog`, with a URL per article.
+
+## Routes
+
+| Route         | What it is                                                   |
+| ------------- | ------------------------------------------------------------ |
+| `/`           | The portfolio — the 3D station on desktop, the page on touch  |
+| `/world`      | The 3D demo, explicitly, on any device                        |
+| `/blog`       | Every write-up                                                |
+| `/blog/:slug` | One write-up                                                  |
+
+Routing is `src/lib/router.ts` — the History API with a subscription. Four
+routes need no nested layouts or loaders, and a routing library would be the
+second largest thing in the bundle a phone downloads to read a landing page.
 
 ## Running it
 
@@ -56,6 +73,11 @@ src/
 │   └── ambientAudio.ts      the ambience behind the SOUND toggle
 ├── state/WorldContext.tsx   stage, proximity, open panels, quality, capabilities
 ├── components/
+│   ├── site/                the page routes
+│   │   ├── Landing          the portfolio as a document — default on touch
+│   │   ├── Blog             the index and one article
+│   │   ├── Chrome           header and footer for the page routes
+│   │   └── Link             an anchor that navigates without a reload
 │   ├── world/               everything inside the <Canvas>
 │   │   ├── SpaceScene       canvas, tiered post-processing, scene assembly
 │   │   ├── CameraRig        follow, cinematic focus, and the arrival move
@@ -75,6 +97,7 @@ src/
 │       ├── Joystick         mobile movement
 │       ├── Cursor           the desktop dot
 │       └── Fallback         the whole portfolio as a document
+├── lib/router.ts            four routes, on the History API
 └── hooks/
     ├── useControls.ts       binds input and routes the interact key
     └── useTexture.ts        procedural textures that dispose themselves
@@ -145,11 +168,13 @@ is what a crawler and a visitor without WebGL get.
 
 ## Things worth knowing before editing
 
-- **There are two ways through the site, not one.** The station is the
-  experience; the written portfolio is the same content as a document, reached
-  by READ INSTEAD or automatically when WebGL is unavailable. On touch the
-  landing states who this is up front, because a phone reaches the content
-  faster by reading than by walking a station on a five-inch screen.
+- **The device decides what `/` is, and the URL can always override it.**
+  Touch gets the page, desktop gets the world, and `/world` forces the world
+  on either. Anyone without a WebGL context gets the page wherever they asked
+  for the world, redirected with `replace` so Back does not land on it again.
+- **`components/world/World.tsx` is the only dynamic import.** It is the sole
+  entry to anything that touches three.js, which is what keeps 400 KB off a
+  phone that only wanted to read.
 - **`data/zones.ts` deliberately does not import three.js.** It is read by the
   HUD and the panels, which are in the eagerly loaded bundle. Importing a
   vector class there pulls the entire renderer in with it — it did, once, and
