@@ -45,11 +45,26 @@ npm run lint
 |             | Desktop                | Touch              |
 | ----------- | ---------------------- | ------------------ |
 | Move        | `W` `A` `S` `D` / arrows | floating joystick, left half |
+| Jump        | `Space`                | ▲, bottom right    |
 | Look        | drag                   | swipe              |
-| Interact    | `E` / `Space` / `Enter` | tap the prompt    |
+| Interact    | `E` / `Enter`          | tap the prompt     |
 | Close       | `Esc`                  | tap ✕              |
 
+`Space` again in mid-air fires the thruster once, for one longer arc. It
+recharges on landing.
+
 The compass along the bottom jumps to any destination without walking there.
+
+## Leaving the station
+
+Run at the rim and jump. Clear the rail and the station lets go: the avatar
+tumbles out, and a moon is underneath by the time it stops climbing. There is
+nothing to read out there — it is a place, not a page — and jumping off *its*
+edge brings you home. Each trip out picks a different one.
+
+A world is a row in `src/data/planets.ts`: four colours, a gravity and a
+radius. Gravity is the only number that changes how the jump feels, and it is
+per world, so the ice field is floaty and the molten shelf is not.
 
 `?nofx` disables post-processing, which is useful when profiling.
 
@@ -63,9 +78,12 @@ src/
 │   ├── experience.ts        the mission log
 │   ├── process.ts           the six stages
 │   ├── site.ts              identity, about, contact, lab
+│   ├── planets.ts           the station and the four worlds past its edge
 │   └── zones.ts             where every destination is — three.js-free on purpose
 ├── lib/
 │   ├── input.ts             keyboard, joystick and drag, collapsed into one struct
+│   ├── avatarPose.ts        the pose type, the idle routines, and the director
+│   ├── journey.ts           a trip between worlds, as per-frame numbers
 │   ├── perf.ts              device tier: dpr, shadows, effects, particle counts
 │   ├── bay.ts               layout of the projects arc
 │   ├── spaceTextures.ts     every texture and every in-world label, drawn on canvas
@@ -81,7 +99,9 @@ src/
 │   ├── world/               everything inside the <Canvas>
 │   │   ├── SpaceScene       canvas, tiered post-processing, scene assembly
 │   │   ├── CameraRig        follow, cinematic focus, and the arrival move
-│   │   ├── Player           the avatar, movement, and all proximity tests
+│   │   ├── Player           movement, gravity, the edge, and all proximity tests
+│   │   ├── Avatar           the figure, and the only code that poses it
+│   │   ├── Surface          a world that is not the station
 │   │   ├── Station          deck, hub, spokes, rim
 │   │   ├── Cosmos           starfield, planet with a rim-lit atmosphere, haze
 │   │   ├── ProjectBay       the seven exhibits
@@ -90,7 +110,7 @@ src/
 │   │   └── Dust             particulate, for scale
 │   └── ui/                  the 2D layer
 │       ├── Boot             the loading sequence and ENTER THE WORLD
-│       ├── Hud              wordmark, prompt, controls hint, compass
+│       ├── Hud              wordmark, prompt, hint, compass, jump, arrival card
 │       ├── Panel            the shell every destination opens inside
 │       ├── Panels           the content of each destination
 │       ├── ProjectPanel     one exhibit, opened
