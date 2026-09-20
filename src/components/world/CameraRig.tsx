@@ -5,6 +5,7 @@ import { zones } from '@/data/zones'
 import { projectSlotPosition } from '@/lib/bay'
 import { projects } from '@/data/projects'
 import { clamp, damp, input } from '@/lib/input'
+import { journey } from '@/lib/journey'
 import { playerPosition } from './Player'
 import { useWorld } from '@/state/WorldContext'
 
@@ -64,31 +65,40 @@ export function CameraRig({ yawOut }: { yawOut: React.RefObject<number> }) {
     /* ── WHAT THE CAMERA IS LOOKING AT ────────────────────────── */
     let focus: THREE.Vector3 | null = null
     let distance = FOLLOW.distance
-    let height = FOLLOW.height
+    let rise = FOLLOW.height
 
     if (openProject) {
       const index = projects.findIndex((p) => p.id === openProject)
       if (index >= 0) {
         focus = projectSlotPosition(index)
         distance = 7.5
-        height = 3.6
+        rise = 3.6
       }
     } else if (openZone) {
       focus = zoneCentre.get(openZone) ?? null
       distance = openZone === 'projects' ? 20 : 11
-      height = openZone === 'projects' ? 9 : 5
+      rise = openZone === 'projects' ? 9 : 5
     }
 
     /* Track the avatar smoothly even while focused elsewhere, so the return
        move lands on where the player is now rather than where they were. */
-    smoothedTarget.lerp(focus ?? playerPosition, damp(focus ? 2.6 : 7, dt))
+    const track = focus ?? playerPosition
+    const height = smoothedTarget.y
+    smoothedTarget.lerp(track, damp(focus ? 2.6 : 7, dt))
+    /* Height is followed far more slowly than the ground track. A camera
+       that matches a jump one for one makes the jump invisible: the avatar
+       stays put in frame and the world drops instead. */
+    smoothedTarget.y = height + (track.y - height) * damp(focus ? 2.6 : 2.2, dt)
 
     aim.copy(smoothedTarget)
     aim.y += focus ? 2.6 : FOLLOW.lookHeight
 
     /* ── WHERE THE CAMERA SITS ────────────────────────────────── */
-    const pullBack = 1 + (1 - arrived) * 2.6
-    const rise = 1 + (1 - arrived) * 5.2
+    /* Two pull-backs multiply: the opening move, and the one that watches a
+       launch. Both are the same gesture — stand off and let the scale of the
+       thing you are leaving read. */
+    const pullBack = (1 + (1 - arrived) * 2.6) * (1 + journey.detach * 1.5)
+    const lift = 1 + (1 - arrived) * 5.2
 
     offset.set(
       Math.sin(yaw.current) * Math.cos(pitch.current),
@@ -96,7 +106,7 @@ export function CameraRig({ yawOut }: { yawOut: React.RefObject<number> }) {
       Math.cos(yaw.current) * Math.cos(pitch.current),
     )
     offset.multiplyScalar(distance * pullBack)
-    offset.y = (height + Math.sin(pitch.current) * distance * 0.4) * rise
+    offset.y = (rise + Math.sin(pitch.current) * distance * 0.4) * lift + journey.detach * 7
 
     eye.copy(smoothedTarget).add(offset)
 
@@ -104,7 +114,7 @@ export function CameraRig({ yawOut }: { yawOut: React.RefObject<number> }) {
        through the station and instantly breaks the illusion. */
     eye.y = Math.max(eye.y, 1.4)
 
-    const settle = damp(focus ? 2.4 : 4.2, dt)
+    const settle = damp(focus ? 2.4 : journey.detach > 0.01 ? 2 : 4.2, dt)
     camera.position.lerp(eye, settle)
 
     /* Look-at is interpolated through a quaternion rather than applied

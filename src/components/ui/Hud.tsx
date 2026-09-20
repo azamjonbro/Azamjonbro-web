@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getZone, zones } from '@/data/zones'
+import { HOME, getPlanet } from '@/data/planets'
+import { requestJump } from '@/lib/input'
 import { getProject } from '@/data/projects'
 import { site } from '@/data/site'
 import { routes } from '@/lib/router'
@@ -17,10 +19,12 @@ export function Hud() {
   const {
     stage, nearZone, nearProject, openZone, openProject,
     openPanel, showProject, hintSeen, isTouch, audioOn, toggleAudio,
+    planet, blocked,
   } = useWorld()
 
   if (stage !== 'entered') return null
   const overlayOpen = openZone !== null || openProject !== null
+  const offWorld = planet !== HOME
 
   const project = nearProject ? getProject(nearProject) : undefined
   const zone = nearZone ? getZone(nearZone) : undefined
@@ -64,8 +68,96 @@ export function Hud() {
 
       <Prompt target={target} isTouch={isTouch} hidden={overlayOpen} />
 
-      <Compass hidden={overlayOpen} />
+      {/* Off-world there is nothing to navigate to, so the destination list
+          gives its space back to the one instruction that still applies. */}
+      {offWorld ? <Beacon hidden={overlayOpen} /> : <Compass hidden={overlayOpen} />}
+
+      <Arrival />
+
+      {isTouch && <JumpButton hidden={overlayOpen || blocked} />}
     </>
+  )
+}
+
+/* ─── JUMP ────────────────────────────────────────────────────── */
+
+/**
+ * The touch jump.
+ *
+ * Bottom right, opposite the thumb on the stick, and raised clear of the
+ * compass rail — the two controls are used at the same time and must never
+ * be reachable by the same thumb.
+ */
+function JumpButton({ hidden }: { hidden: boolean }) {
+  return (
+    <button
+      type="button"
+      className={`jump-btn${hidden ? ' is-hidden' : ''}`}
+      /* Pointer down, not click: waiting for the tap to complete adds the
+         browser's own delay to a control that has to feel immediate. */
+      onPointerDown={(e) => {
+        e.preventDefault()
+        requestJump()
+      }}
+      aria-hidden={hidden}
+      tabIndex={-1}
+    >
+      <span className="sr-only">Jump</span>
+      <span aria-hidden>▲</span>
+    </button>
+  )
+}
+
+/* ─── ARRIVAL CARD ────────────────────────────────────────────── */
+
+/** Names the world you are falling toward, then gets out of the way. */
+function Arrival() {
+  const { planet, travel } = useWorld()
+  const world = getPlanet(planet)
+  const [shown, setShown] = useState(false)
+
+  useEffect(() => {
+    if (travel !== 'idle') {
+      setShown(true)
+      return
+    }
+    /* Held past touchdown, so the name is still readable once the dust has
+       settled rather than vanishing on the frame the controls come back. */
+    const timer = setTimeout(() => setShown(false), 2800)
+    return () => clearTimeout(timer)
+  }, [travel, planet])
+
+  const leaving = travel === 'leaving'
+
+  return (
+    <div
+      className={`arrival${shown ? ' is-visible' : ''}`}
+      style={{ ['--accent' as string]: world.accent }}
+      aria-live="polite"
+    >
+      <p className="arrival-caption">{leaving ? 'LEAVING ORBIT' : 'ARRIVING'}</p>
+      <p className="arrival-name">{world.name}</p>
+      <p className="arrival-sub">{leaving ? 'TRAJECTORY UNPLANNED' : world.caption}</p>
+    </div>
+  )
+}
+
+/* ─── OFF-WORLD ───────────────────────────────────────────────── */
+
+/** Where you are, and the only way back. */
+function Beacon({ hidden }: { hidden: boolean }) {
+  const { planet } = useWorld()
+  const world = getPlanet(planet)
+
+  return (
+    <div
+      className={`beacon${hidden ? ' is-hidden' : ''}`}
+      style={{ ['--accent' as string]: world.accent }}
+    >
+      <span className="beacon-dot" aria-hidden />
+      <span className="beacon-name">{world.name}</span>
+      <span className="beacon-hint">JUMP OFF THE EDGE TO RETURN</span>
+    </div>
   )
 }
 
@@ -126,12 +218,13 @@ function ControlsHint({ isTouch }: { isTouch: boolean }) {
       {isTouch ? (
         <>
           <span><b>DRAG</b> MOVE</span>
-          <span><b>SWIPE</b> LOOK</span>
+          <span><b>▲</b> JUMP</span>
           <span><b>TAP</b> INTERACT</span>
         </>
       ) : (
         <>
           <span><b>W A S D</b> MOVE</span>
+          <span><b>SPACE</b> JUMP</span>
           <span><b>DRAG</b> LOOK</span>
           <span><b>E</b> INTERACT</span>
         </>

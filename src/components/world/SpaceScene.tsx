@@ -1,15 +1,18 @@
-import { Suspense, useEffect, useRef } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Suspense, useEffect, useMemo, useRef } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Preload, useProgress } from '@react-three/drei'
 import { Bloom, EffectComposer, N8AO, SMAA, Vignette } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 import * as THREE from 'three'
 import { zones } from '@/data/zones'
+import { HOME, getPlanet, type Planet } from '@/data/planets'
+import { damp } from '@/lib/input'
 import { useWorld } from '@/state/WorldContext'
 import { CameraRig } from './CameraRig'
 import { Cosmos } from './Cosmos'
 import { Station } from './Station'
 import { Player } from './Player'
+import { Surface } from './Surface'
 import { ProjectBay } from './ProjectBay'
 import { ZoneMarker } from './ZoneMarker'
 import { Dust } from './Dust'
@@ -98,31 +101,72 @@ function Effects() {
   )
 }
 
+/**
+ * Background and fog, moved between worlds rather than switched.
+ *
+ * The trip out is continuous — the avatar never leaves the frame — so a hard
+ * change of sky halfway through it would be the only cut in the whole site.
+ * Both are mutated in place, which is also the only way to change them
+ * without remounting the canvas.
+ */
+function Atmosphere({ planet }: { planet: Planet }) {
+  const scene = useThree((state) => state.scene)
+  const wanted = useMemo(() => new THREE.Color(), [])
+
+  useFrame((_, delta) => {
+    const k = damp(1.3, Math.min(delta, 0.1))
+    wanted.set(planet.sky)
+
+    if (scene.background instanceof THREE.Color) scene.background.lerp(wanted, k)
+
+    const fog = scene.fog
+    if (fog instanceof THREE.Fog) {
+      fog.color.lerp(wanted, k)
+      fog.near += (planet.fog[0] - fog.near) * k
+      fog.far += (planet.fog[1] - fog.far) * k
+    }
+  })
+
+  return null
+}
+
 function World() {
   /* The camera writes its yaw here and the player reads it, so movement is
      camera-relative without either of them re-rendering the other. */
   const cameraYaw = useRef(0)
+  const { planet } = useWorld()
+  const home = planet === HOME
+  const surface = getPlanet(planet)
 
   return (
     <>
       <CameraRig yawOut={cameraYaw} />
       <Lighting />
       <Cosmos />
+      <Atmosphere planet={surface} />
 
-      <Station />
+      {/* The station is hidden rather than unmounted while the player is
+          away: coming home should not rebuild every procedural texture on
+          it, and the cost of a hidden subtree is a visibility check. */}
+      <group visible={home}>
+        <Station />
+
+        {zones.map((zone) => (
+          <ZoneMarker key={zone.id} zone={zone} />
+        ))}
+
+        <AboutCore />
+        <ProjectBay />
+        <SkillConstellation />
+        <MissionPillars />
+        <ProcessRing />
+        <LabModule />
+        <ContactUplink />
+      </group>
+
+      {!home && <Surface planet={surface} />}
+
       <Player cameraYaw={cameraYaw} />
-
-      {zones.map((zone) => (
-        <ZoneMarker key={zone.id} zone={zone} />
-      ))}
-
-      <AboutCore />
-      <ProjectBay />
-      <SkillConstellation />
-      <MissionPillars />
-      <ProcessRing />
-      <LabModule />
-      <ContactUplink />
 
       <Dust />
     </>

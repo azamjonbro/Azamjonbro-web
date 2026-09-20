@@ -14,6 +14,14 @@ export const input = {
   pitch: 0.28,
   /** Set for one frame when interact is pressed. Consumers clear it. */
   interact: false,
+  /**
+   * Set when jump is pressed, cleared by whoever acts on it.
+   *
+   * A latch rather than a held flag: a jump is an event, and reading a held
+   * key each frame is how you get a character that hops continuously while
+   * space is down.
+   */
+  jump: false,
   /** True while any movement control is engaged — used to retire the hint. */
   moving: false,
   /** Pointer in normalised device coordinates, for the idle camera drift. */
@@ -29,6 +37,11 @@ const PITCH_MAX = 0.72
 
 export function clamp(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v))
+}
+
+/** Raises the jump latch. The joystick's button and the keyboard share it. */
+export function requestJump() {
+  input.jump = true
 }
 
 /** Frame-rate independent damping factor. */
@@ -102,7 +115,16 @@ export function bindInput(opts: {
 
     if (blocked()) return
     held.add(e.code)
-    if (e.code === 'KeyE' || e.code === 'Space' || e.code === 'Enter') onInteract()
+
+    /* Auto-repeat still has to reach `held` — a rebind clears it, and the
+       repeat is what puts a key that is genuinely down back in the set. It
+       must not reach the actions: a held space bar would fire a jump every
+       few milliseconds. */
+    if (!e.repeat) {
+      if (e.code === 'Space') requestJump()
+      else if (e.code === 'KeyE' || e.code === 'Enter') onInteract()
+    }
+
     syncMove()
   }
 
@@ -165,6 +187,7 @@ export function bindInput(opts: {
     window.removeEventListener('blur', onBlur)
     held.clear()
     stick = { x: 0, z: 0 }
+    input.jump = false
     syncMove()
   }
 }
@@ -173,5 +196,6 @@ export function bindInput(opts: {
 export function releaseControls() {
   held.clear()
   stick = { x: 0, z: 0 }
+  input.jump = false
   syncMove()
 }

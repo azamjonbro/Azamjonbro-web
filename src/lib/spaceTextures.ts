@@ -387,3 +387,76 @@ export function createCaption(lines: string[], accent: string, sizes: number[] =
 
   return finish(el)
 }
+
+/* ─── OFF-WORLD GROUND ────────────────────────────────────────── */
+
+function rgb(hex: string) {
+  const n = parseInt(hex.slice(1), 16)
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255] as const
+}
+
+/**
+ * The floor of somewhere that is not the station.
+ *
+ * Tiled rather than mapped, so one 512px canvas covers a fifty-metre plain:
+ * at the angle the camera holds, mottling and grit carry the material and
+ * nothing large enough to repeat visibly is ever drawn.
+ */
+export function createSurfaceTexture(ground: string, rock: string, accent: string, size = 512) {
+  const { el, ctx } = canvas2d(size, size)
+  const [gr, gg, gb] = rgb(ground)
+  const [rr, rg, rb] = rgb(rock)
+
+  ctx.fillStyle = ground
+  ctx.fillRect(0, 0, size, size)
+
+  /* Mottling. Drawn wrapped in both axes so the tile has no seam. */
+  for (let i = 0; i < 260; i++) {
+    const x = Math.random() * size
+    const y = Math.random() * size
+    const r = 12 + Math.random() * 70
+    const toward = Math.random()
+    const c = toward > 0.5
+      ? `rgba(${rr},${rg},${rb},${0.05 + Math.random() * 0.16})`
+      : `rgba(${Math.round(gr * 0.4)},${Math.round(gg * 0.4)},${Math.round(gb * 0.4)},${0.05 + Math.random() * 0.2})`
+
+    for (const [ox, oy] of [[0, 0], [size, 0], [-size, 0], [0, size], [0, -size]]) {
+      const g = ctx.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, r)
+      g.addColorStop(0, c)
+      g.addColorStop(1, c.replace(/[\d.]+\)$/, '0)'))
+      ctx.fillStyle = g
+      ctx.fillRect(x + ox - r, y + oy - r, r * 2, r * 2)
+    }
+  }
+
+  /* Grit. The thing that stops a large flat surface reading as plastic. */
+  const img = ctx.getImageData(0, 0, size, size)
+  for (let i = 0; i < img.data.length; i += 4) {
+    const n = (Math.random() - 0.5) * 26
+    img.data[i] = Math.max(0, Math.min(255, img.data[i] + n))
+    img.data[i + 1] = Math.max(0, Math.min(255, img.data[i + 1] + n))
+    img.data[i + 2] = Math.max(0, Math.min(255, img.data[i + 2] + n))
+  }
+  ctx.putImageData(img, 0, 0)
+
+  /* Fractures, faintly lit from below — the one thing on the tile that is
+     the planet's colour rather than its dirt. */
+  ctx.strokeStyle = `${accent}22`
+  ctx.lineWidth = 1.2
+  for (let i = 0; i < 26; i++) {
+    let x = Math.random() * size
+    let y = Math.random() * size
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    for (let s = 0; s < 5; s++) {
+      x += (Math.random() - 0.5) * 90
+      y += (Math.random() - 0.5) * 90
+      ctx.lineTo(x, y)
+    }
+    ctx.stroke()
+  }
+
+  const texture = finish(el)
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping
+  return texture
+}

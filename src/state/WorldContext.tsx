@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { ZoneId } from '@/data/zones'
+import { HOME, type PlanetId } from '@/data/planets'
 import { detectQuality, webglAvailable, type Quality } from '@/lib/perf'
 import { releaseControls } from '@/lib/input'
 import { uiSounds } from '@/lib/uiSounds'
@@ -15,6 +16,15 @@ import { ambientAudio } from '@/lib/ambientAudio'
 
 /** Where the visitor is in the experience, not where they are in the world. */
 export type Stage = 'booting' | 'ready' | 'entered'
+
+/**
+ * A trip between worlds.
+ *
+ *   idle      standing on a surface
+ *   leaving   over the edge and climbing away from it
+ *   landing   falling toward somewhere new
+ */
+export type Travel = 'idle' | 'leaving' | 'landing'
 
 interface WorldValue {
   stage: Stage
@@ -38,6 +48,16 @@ interface WorldValue {
   openProject: string | null
   showProject: (id: string) => void
   closeProject: () => void
+
+  /** The surface under the player's feet. */
+  planet: PlanetId
+  travel: Travel
+  /** Called by the avatar the moment it clears the edge. */
+  leaveOrbit: () => void
+  /** Swaps the world under the falling avatar. */
+  landOn: (id: PlanetId) => void
+  /** Touchdown: hands the controls back. */
+  settle: () => void
 
   /** True while any overlay owns the input. */
   blocked: boolean
@@ -66,6 +86,8 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   const [openProject, setOpenProject] = useState<string | null>(null)
   const [hintSeen, setHintSeen] = useState(false)
   const [audioOn, setAudioOn] = useState(false)
+  const [planet, setPlanet] = useState<PlanetId>(HOME)
+  const [travel, setTravel] = useState<Travel>('idle')
 
   const [quality] = useState<Quality>(detectQuality)
   const [hasWebGL] = useState(webglAvailable)
@@ -128,12 +150,34 @@ export function WorldProvider({ children }: { children: ReactNode }) {
 
   const closeProject = useCallback(() => setOpenProject(null), [])
 
+  const leaveOrbit = useCallback(() => {
+    uiSounds.launch()
+    setTravel('leaving')
+    /* Nothing on the old world is near you any more, and a prompt left
+       standing while you fall away from it is the kind of detail that makes
+       the whole trip feel unfinished. */
+    setNearZone(null)
+    setNearProject(null)
+  }, [])
+
+  const landOn = useCallback((id: PlanetId) => {
+    setPlanet(id)
+    setTravel('landing')
+  }, [])
+
+  /* Touchdown. The sound belongs to the avatar hitting the ground, not to
+     the state change, so it is played where the impact is measured. */
+  const settle = useCallback(() => setTravel('idle'), [])
+
   const retireHint = useCallback(() => setHintSeen(true), [])
 
   const toggleAudio = useCallback(() => setAudioOn(ambientAudio.toggle()), [])
 
 
-  const blocked = stage !== 'entered' || openZone !== null || openProject !== null
+  /* The flight is a cutscene: input is released for its length, which is
+     also what stops the avatar from trying to walk in mid-air. */
+  const blocked =
+    stage !== 'entered' || openZone !== null || openProject !== null || travel !== 'idle'
 
   /* Escape unwinds one layer at a time, innermost first. */
   useEffect(() => {
@@ -168,6 +212,11 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       openProject,
       showProject,
       closeProject,
+      planet,
+      travel,
+      leaveOrbit,
+      landOn,
+      settle,
       blocked,
       hintSeen,
       retireHint,
@@ -182,6 +231,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       stage, progress, markReady, enter,
       nearZone, openZone, openPanel, closePanel,
       nearProject, openProject, showProject, closeProject,
+      planet, travel, leaveOrbit, landOn, settle,
       blocked, hintSeen, retireHint,
       audioOn, toggleAudio,
       quality, hasWebGL, isTouch, reducedMotion,

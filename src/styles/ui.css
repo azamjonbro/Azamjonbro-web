@@ -420,6 +420,144 @@
   box-shadow: 0 0 10px var(--accent);
 }
 
+/* ─── ARRIVAL ─────────────────────────────────────────────────── */
+
+/* The one moment the HUD is allowed the middle of the screen. It is also
+   the only moment the player is not in control, which is what makes taking
+   it acceptable. */
+.arrival {
+  position: fixed;
+  z-index: 62;
+  left: 50%;
+  top: 24%;
+  transform: translate(-50%, -14px);
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.7s var(--snap), transform 0.7s var(--snap);
+}
+
+.arrival.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.arrival-caption {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  color: var(--accent);
+}
+
+.arrival-name {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.8rem, 6vw, 3.4rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  text-shadow: 0 4px 44px rgba(0, 0, 0, 0.9);
+}
+
+.arrival-sub {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.24em;
+  color: var(--text-2);
+}
+
+/* ─── OFF-WORLD BEACON ────────────────────────────────────────── */
+
+/* Sits exactly where the compass does, because it is the same thing: the
+   list of places you can go, on a world where there is only one. */
+.beacon {
+  position: fixed;
+  z-index: 60;
+  left: 0;
+  right: 0;
+  bottom: 26px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+  border-radius: 999px;
+  background: rgba(6, 9, 16, 0.6);
+  backdrop-filter: blur(16px);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  pointer-events: none;
+  animation: hud-in 0.9s var(--glide) both;
+  transition: opacity 0.45s var(--snap), transform 0.45s var(--snap);
+}
+
+.beacon.is-hidden {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.beacon-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  animation: beacon-pulse 2.6s ease-in-out infinite;
+}
+
+.beacon-name { color: var(--text); }
+.beacon-hint { color: var(--text-3); }
+
+@keyframes beacon-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ─── TOUCH JUMP ──────────────────────────────────────────────── */
+
+/* Opposite the stick and clear of the compass rail: the two are used at
+   once, and must never be reachable by the same thumb. */
+.jump-btn {
+  position: fixed;
+  z-index: 71;
+  right: 20px;
+  bottom: 96px;
+  width: 78px;
+  height: 78px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(6, 9, 16, 0.45);
+  backdrop-filter: blur(8px);
+  color: var(--cyan);
+  font-size: 19px;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.3s var(--snap), transform 0.12s var(--snap), background 0.2s var(--snap);
+}
+
+.jump-btn:active {
+  transform: scale(0.92);
+  background: color-mix(in srgb, var(--cyan) 20%, transparent);
+}
+
+.jump-btn.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* ─── PANELS ──────────────────────────────────────────────────── */
 
 .panel-backdrop {
@@ -1684,6 +1822,21 @@
   .compass::-webkit-scrollbar { display: none; }
   .compass-item { flex: none; }
   .compass-label { white-space: nowrap; }
+
+  .beacon {
+    left: 12px;
+    right: 12px;
+    bottom: 18px;
+    width: auto;
+    max-width: none;
+    border-radius: 14px;
+  }
+
+  .beacon-hint { display: none; }
+
+  .jump-btn { bottom: 82px; width: 72px; height: 72px; }
+
+  .arrival { top: 22%; }
 
   .panel { padding: 1.5rem 1.15rem; }
   .panel-head { padding-right: 4.5rem; }
